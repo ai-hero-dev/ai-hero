@@ -7,8 +7,8 @@ import type {
   LanguageModelV1StreamPart,
 } from "ai";
 import { simulateReadableStream } from "ai/test";
-import type { StorageCache } from "./types";
-import { createKey, fixTimestampsOnCachedObject } from "./utils";
+import type { StorageCache } from "./types.ts";
+import { createKey, fixTimestampsOnCachedObject } from "./utils.ts";
 
 /**
  * Creates a middleware that caches the responses of the

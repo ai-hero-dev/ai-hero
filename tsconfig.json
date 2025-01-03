@@ -15,12 +15,15 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
 
     /* If NOT transpiling with TypeScript: */
-    "module": "preserve",
+    "module": "NodeNext",
     "noEmit": true,
 
     "lib": ["ESNext"]
   },
+
   "exclude": ["./examples"]
 }

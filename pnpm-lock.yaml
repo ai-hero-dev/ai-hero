@@ -46,9 +46,15 @@ devDependencies:
   '@eslint/js':
     specifier: ^9.17.0
     version: 9.17.0
+  '@hono/node-server':
+    specifier: ^1.13.7
+    version: 1.13.7(hono@4.6.15)
   eslint:
     specifier: ^9.17.0
     version: 9.17.0
+  hono:
+    specifier: ^4.6.15
+    version: 4.6.15
   typescript:
     specifier: ^5.7.2
     version: 5.7.2
@@ -535,6 +541,15 @@ packages:
       - bufferutil
       - utf-8-validate
     dev: false
+
+  /@hono/node-server@1.13.7(hono@4.6.15):
+    resolution: {integrity: sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
+    dependencies:
+      hono: 4.6.15
+    dev: true
 
   /@humanfs/core@0.19.1:
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2093,6 +2108,11 @@ packages:
   /has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
+    dev: true
+
+  /hono@4.6.15:
+    resolution: {integrity: sha512-OiQwvAOAaI2JrABBH69z5rsctHDzFzIKJge0nYXgtzGJ0KftwLWcBXm1upJC23/omNRtnqM0gjRMbtXshPdqhQ==}
+    engines: {node: '>=16.9.0'}
     dev: true
 
   /http-errors@2.0.0:

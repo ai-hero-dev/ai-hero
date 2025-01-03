@@ -7,8 +7,8 @@
   "license": "GPL",
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.6",
-    "@ai-sdk/openai-compatible": "^0.0.13",
     "@ai-sdk/openai": "^1.0.8",
+    "@ai-sdk/openai-compatible": "^0.0.13",
     "@types/node": "^22.10.2",
     "ai": "^4.0.18",
     "autoevals": "^0.0.111",
@@ -27,7 +27,9 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@hono/node-server": "^1.13.7",
     "eslint": "^9.17.0",
+    "hono": "^4.6.15",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.19.0"
   }

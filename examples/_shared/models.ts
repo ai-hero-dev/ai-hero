@@ -1,5 +1,5 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { cacheModelInFs } from "../vercel-ai-sdk/17-caching/cache-model-in-fs";
+import { cacheModelInFs } from "../vercel-ai-sdk/17-caching/cache-model-in-fs.ts";
 import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -18,7 +18,7 @@ export const smallOpenAiModel = cacheModelInFs(openai("gpt-4o-mini"));
  * trouble connecting to localhost. So, this is a me-only
  * workaround.
  */
-const getLocalhost = () => {
+export const getLocalhost = () => {
   return process.env.LOCALHOST_OVERRIDE || "localhost";
 };
 
@@ -44,6 +44,8 @@ export const localModel = cacheModelInFs(
   // you currently have loaded
   lmstudio("")
 );
+
+export const unCachedLocalModel = lmstudio("");
 
 export const smallModel = process.env.USE_LOCAL_MODEL
   ? localModel

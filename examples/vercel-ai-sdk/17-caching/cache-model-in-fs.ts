@@ -1,5 +1,5 @@
 import { experimental_wrapLanguageModel, type LanguageModelV1 } from "ai";
-import { createCacheMiddleware } from "./cache-model";
+import { createCacheMiddleware } from "./cache-model.ts";
 import { createStorage } from "unstorage";
 import fsDriver from "unstorage/drivers/fs";
 
@@ -7,7 +7,9 @@ import fsDriver from "unstorage/drivers/fs";
  * The cache object that uses the file system as a storage.
  */
 const cache = createStorage({
-  driver: fsDriver({
+  // unstorage's types are a bit dodgy, so an
+  // as any is needed
+  driver: (fsDriver as any)({
     base: "./node_modules/.cache",
   }),
 });
