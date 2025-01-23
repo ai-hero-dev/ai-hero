@@ -1,15 +1,17 @@
 import { generateText } from "ai";
+import { prompt } from "@promptbook/utils";
 import { flagshipAnthropicModel } from "../../_shared/models.ts";
 
 const model = flagshipAnthropicModel;
 
-const systemPrompt =
-  `You will receive an image. ` +
-  `Please create an alt text for the image. ` +
-  `Be concise. ` +
-  `Use adjectives only when necessary. ` +
-  `Do not pass 160 characters. ` +
-  `Use simple language. `;
+const systemPrompt = prompt`
+  You will receive an image.
+  Please create an alt text for the image.
+  Be concise.
+  Use adjectives only when necessary.
+  Do not pass 160 characters.
+  Use simple language.
+`;
 
 export const describeImage = async (
   imageUrl: string,

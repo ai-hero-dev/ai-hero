@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { pdfModel as model } from "../../_shared/models.ts";
 import { readFileSync } from "fs";
 import path from "path";
+import { prompt } from "@promptbook/utils";
 
 const schema = z
   .object({
@@ -38,9 +39,10 @@ export const extractDataFromInvoice = async (
 ) => {
   const { object } = await generateObject({
     model,
-    system:
-      `You will receive an invoice. ` +
-      `Please extract the data from the invoice.`,
+    system: prompt`
+      You will receive an invoice.
+      Please extract the data from the invoice.
+    `,
     schema,
     messages: [
       {

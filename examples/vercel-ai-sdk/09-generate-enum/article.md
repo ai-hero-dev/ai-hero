@@ -24,9 +24,10 @@ export const classifySentiment = async (
     model,
     output: "enum",
     prompt: text,
-    system:
-      `Classify the sentiment of the text as either ` +
-      `positive, negative, or neutral.`,
+    system: prompt`
+      Classify the sentiment of the text as either 
+      positive, negative, or neutral.
+    `,
   });
 };
 ```
@@ -46,9 +47,10 @@ export const classifySentiment = async (
     output: "enum",
     enum: ["positive", "negative", "neutral"],
     prompt: text,
-    system:
-      `Classify the sentiment of the text as either ` +
-      `positive, negative, or neutral.`,
+    system: prompt`
+      Classify the sentiment of the text as either 
+      positive, negative, or neutral.
+    `,
   });
 };
 ```
@@ -68,9 +70,10 @@ export const classifySentiment = async (
     output: "enum",
     enum: ["positive", "negative", "neutral"],
     prompt: text,
-    system:
-      `Classify the sentiment of the text as either ` +
-      `positive, negative, or neutral.`,
+    system: prompt`
+      Classify the sentiment of the text as either 
+      positive, negative, or neutral.
+    `,
   });
 
   return object;

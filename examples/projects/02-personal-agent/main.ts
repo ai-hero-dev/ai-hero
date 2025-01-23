@@ -1,5 +1,6 @@
 import { confirm, log, text } from "@clack/prompts";
 import { streamText, tool } from "ai";
+import { prompt } from "@promptbook/utils";
 import { inspect } from "node:util";
 import { z } from "zod";
 import {
@@ -193,12 +194,12 @@ await cliChat({
     const result = streamText({
       model: flagshipAnthropicModel,
       messages: messages,
-      system:
-        `You have the responsibility for updating the site AI Hero. ` +
-        `It is a blog teaching AI engineering. ` +
-        `When mentioning resources (like posts), provide URLs. ` +
-        `If a tool call fails, show the raw JSON error to the user.`,
-
+      system: prompt`
+        You have the responsibility for updating the site AI Hero.
+        It is a blog teaching AI engineering.
+        When mentioning resources (like posts), provide URLs.
+        If a tool call fails, show the raw JSON error to the user.
+      `,
       tools: {
         viewPostBody: viewPostBodyTool,
         viewPosts: viewPostsTool,

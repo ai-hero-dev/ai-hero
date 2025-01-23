@@ -1,24 +1,25 @@
 import { generateText, tool } from "ai";
+import { prompt } from "@promptbook/utils";
 import { z } from "zod";
 import { smallModel } from "../../_shared/models.ts";
 
 const model = smallModel;
 
-const systemPrompt =
-  `You are interacting with the Star Wars API. ` +
-  `Use the tools provided to fetch data from the API. ` +
-  `Make a plan to find the data, then enact that plan step-by-step. ` +
-  `If you cannot find a record in the Star Wars API, use the index pages to help: ` +
-  `
-    <index_pages>
+const systemPrompt = prompt`
+  You are interacting with the Star Wars API.
+  Use the tools provided to fetch data from the API.
+  Make a plan to find the data, then enact that plan step-by-step.
+  If you cannot find a record in the Star Wars API, use the index pages to help:
 
-    vehicles: https://swapi.py4e.com/api/vehicles/
-    planets: https://swapi.py4e.com/api/planets/
-    films: https://swapi.py4e.com/api/films/
-    people: https://swapi.py4e.com/api/people/
+  <index_pages>
 
-    </index_pages>
-  `;
+  vehicles: https://swapi.py4e.com/api/vehicles/
+  planets: https://swapi.py4e.com/api/planets/
+  films: https://swapi.py4e.com/api/films/
+  people: https://swapi.py4e.com/api/people/
+
+  </index_pages>
+`;
 
 export const askSwapiApi = async (prompt: string) => {
   // 1. Call the Vercel SDK, passing in our model (gpt-4o-mini)

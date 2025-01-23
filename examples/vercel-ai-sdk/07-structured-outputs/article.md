@@ -121,10 +121,11 @@ export const createRecipe = async (prompt: string) => {
     model,
     schema,
     prompt,
-    system:
-      `You are helping a user create a recipe. ` +
-      `Use British English variants of ingredient names,` +
-      `like Coriander over Cilantro.`,
+    system: prompt`
+      You are helping a user create a recipe.
+      Use British English variants of ingredient names,
+      like Coriander over Cilantro.
+    `,
   });
 
   return object.recipe;
@@ -171,9 +172,10 @@ And finally, we can pass a `schemaName` property to the `generateObject` functio
 ```ts
 const { object } = await generateObject({
   model,
-  system:
-    `You are helping a user create a recipe. ` +
-    `Use British English variants of ingredient names, like Coriander over Cilantro.`,
+  system: prompt`
+    You are helping a user create a recipe.
+    Use British English variants of ingredient names, like Coriander over Cilantro.
+  `,
   schemaName: "Recipe",
   schema,
   prompt,

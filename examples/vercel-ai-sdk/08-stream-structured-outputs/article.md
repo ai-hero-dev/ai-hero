@@ -12,10 +12,11 @@ export const createRecipe = async (prompt: string) => {
     model,
     schema,
     prompt,
-    system:
-      `You are helping a user create a recipe. ` +
-      `Use British English variants of ingredient names,` +
-      `like Coriander over Cilantro.`,
+    system: prompt`
+      You are helping a user create a recipe.
+      Use British English variants of ingredient names,
+      like Coriander over Cilantro.
+    `,
   });
 
   return object.recipe;
@@ -32,10 +33,11 @@ You can do that by changing `generateObject` to `streamObject`.
 export const createRecipe = async (prompt: string) => {
   const result = await streamObject({
     model,
-    system:
-      `You are helping a user create a recipe. ` +
-      `Use British English variants of ingredient names,` +
-      `like Coriander over Cilantro.`,
+    system: prompt`
+      You are helping a user create a recipe.
+      Use British English variants of ingredient names,
+      like Coriander over Cilantro.
+    `,
     schemaName: "Recipe",
     schema,
     prompt,
@@ -63,10 +65,11 @@ If we want access to the partial object as it's being generated, we can use `res
 export const createRecipe = async (prompt: string) => {
   const result = await streamObject({
     model,
-    system:
-      `You are helping a user create a recipe. ` +
-      `Use British English variants of ingredient names,` +
-      `like Coriander over Cilantro.`,
+    system: prompt`
+      You are helping a user create a recipe.
+      Use British English variants of ingredient names,
+      like Coriander over Cilantro.
+    `,
     schemaName: "Recipe",
     schema,
     prompt,

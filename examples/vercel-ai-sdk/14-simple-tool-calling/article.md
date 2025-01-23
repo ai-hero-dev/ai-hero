@@ -132,16 +132,18 @@ We'll give it a system prompt to encourage it to use the tool.
 
 ```ts ! example.ts
 import { generateText } from "ai";
+import { prompt } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   await generateText({
     model,
     prompt,
-    system:
-      `Your only role in life is to log ` +
-      `messages to the console. ` +
-      `Use the tool provided to log the ` +
-      `prompt to the console.`,
+    system: prompt`
+      Your only role in life is to log 
+      messages to the console. 
+      Use the tool provided to log the 
+      prompt to the console.
+    `,
   });
 };
 ```
@@ -152,16 +154,18 @@ And finally let's pass it our tool.
 
 ```ts ! example.ts
 import { generateText } from "ai";
+import { prompt } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   await generateText({
     model,
     prompt,
-    system:
-      `Your only role in life is to log ` +
-      `messages to the console. ` +
-      `Use the tool provided to log the ` +
-      `prompt to the console.`,
+    system: prompt`
+      Your only role in life is to log 
+      messages to the console. 
+      Use the tool provided to log the 
+      prompt to the console.
+    `,
     tools: {
       logToConsole: logToConsoleTool,
     },
@@ -197,16 +201,18 @@ We'll look at `steps` later because it starts to get into interesting stuff like
 
 ```ts ! example.ts
 import { generateText } from "ai";
+import { prompt } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   const { steps } = await generateText({
     model,
     prompt,
-    system:
-      `Your only role in life is to log ` +
-      `messages to the console. ` +
-      `Use the tool provided to log the ` +
-      `prompt to the console.`,
+    system: prompt`
+      Your only role in life is to log 
+      messages to the console. 
+      Use the tool provided to log the 
+      prompt to the console.
+    `,
     tools: {
       logToConsole: logToConsoleTool,
     },
@@ -222,16 +228,18 @@ This tells you all of the tools that were called during that step.
 
 ```ts ! example.ts
 import { generateText } from "ai";
+import { prompt } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   const { steps } = await generateText({
     model,
     prompt,
-    system:
-      `Your only role in life is to log ` +
-      `messages to the console. ` +
-      `Use the tool provided to log the ` +
-      `prompt to the console.`,
+    system: prompt`
+      Your only role in life is to log 
+      messages to the console. 
+      Use the tool provided to log the 
+      prompt to the console.
+    `,
     tools: {
       logToConsole: logToConsoleTool,
     },

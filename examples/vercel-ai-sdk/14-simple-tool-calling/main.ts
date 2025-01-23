@@ -1,5 +1,6 @@
 import { smallToolCallingModel } from "../../_shared/models.ts";
 import { tool } from "ai";
+import { prompt } from "@promptbook/utils";
 import { z } from "zod";
 import { generateText } from "ai";
 
@@ -21,11 +22,12 @@ const logToConsole = async (prompt: string) => {
   const { steps } = await generateText({
     model,
     prompt,
-    system:
-      `Your only role in life is to log ` +
-      `messages to the console. ` +
-      `Use the tool provided to log the ` +
-      `prompt to the console.`,
+    system: prompt`
+      Your only role in life is to log
+      messages to the console.
+      Use the tool provided to log the
+      prompt to the console.
+    `,
     tools: {
       logToConsole: logToConsoleTool,
     },

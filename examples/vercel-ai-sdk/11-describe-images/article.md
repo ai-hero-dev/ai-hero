@@ -15,13 +15,14 @@ We might use this alt text on a website or something to help folks who can't act
 We're going to use a pretty simple system prompt:
 
 ```ts ! example.ts
-const systemPrompt =
-  `You will receive an image. ` +
-  `Please create an alt text for the image. ` +
-  `Be concise. ` +
-  `Use adjectives only when necessary. ` +
-  `Do not pass 160 characters. ` +
-  `Use simple language. `;
+const systemPrompt = prompt`
+  You will receive an image.
+  Please create an alt text for the image.
+  Be concise.
+  Use adjectives only when necessary.
+  Do not pass 160 characters.
+  Use simple language.
+`;
 ```
 
 # !!steps
@@ -31,13 +32,14 @@ Then we're going to create a function called `describeImage` which is going to r
 ```ts ! example.ts
 import { generateText } from "ai";
 
-const systemPrompt =
-  `You will receive an image. ` +
-  `Please create an alt text for the image. ` +
-  `Be concise. ` +
-  `Use adjectives only when necessary. ` +
-  `Do not pass 160 characters. ` +
-  `Use simple language. `;
+const systemPrompt = prompt`
+  You will receive an image.
+  Please create an alt text for the image.
+  Be concise.
+  Use adjectives only when necessary.
+  Do not pass 160 characters.
+  Use simple language.
+`;
 
 export const describeImage = async (
   imagePath: string,
@@ -167,19 +169,21 @@ Well, there's a really nice shortcut - You can pass the URL directly to the AI S
 
 ```ts
 import { generateText } from "ai";
+import { prompt } from "@promptbook/utils";
 
 export const describeImage = async (
   imageUrl: string,
 ) => {
   const { text } = await generateText({
     model,
-    system:
-      `You will receive an image. ` +
-      `Please create an alt text for the image. ` +
-      `Be concise. ` +
-      `Use adjectives only when necessary. ` +
-      `Do not pass 160 characters. ` +
-      `Use simple language. `,
+    system: prompt`
+      You will receive an image.
+      Please create an alt text for the image.
+      Be concise.
+      Use adjectives only when necessary.
+      Do not pass 160 characters.
+      Use simple language.
+    `,
     messages: [
       {
         role: "user",
