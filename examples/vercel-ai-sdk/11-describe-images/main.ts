@@ -1,10 +1,10 @@
 import { generateText } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 import { flagshipAnthropicModel } from "../../_shared/models.ts";
 
 const model = flagshipAnthropicModel;
 
-const systemPrompt = prompt`
+const systemPrompt = promptTemplate`
   You will receive an image.
   Please create an alt text for the image.
   Be concise.

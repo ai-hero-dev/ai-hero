@@ -1,5 +1,5 @@
 import { streamObject } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 import { z } from "zod";
 import { smallOpenAiModel } from "../../_shared/models.ts";
 
@@ -29,7 +29,7 @@ const schema = z.object({
 export const createRecipe = async (prompt: string) => {
   const result = await streamObject({
     model,
-    system: prompt`
+    system: promptTemplate`
       You are helping a user create a recipe.
       Use British English variants of ingredient names,
       like Coriander over Cilantro.

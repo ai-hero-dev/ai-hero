@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 import { smallModel } from "../../_shared/models.ts";
 import { readFileSync } from "fs";
 import path from "path";
@@ -10,7 +10,7 @@ export const summarizeText = async (input: string) => {
   const { text } = await generateText({
     model,
     prompt: input,
-    system: prompt`
+    system: promptTemplate`
       You are a text summarizer.
       Summarize the text you receive.
       Be concise.

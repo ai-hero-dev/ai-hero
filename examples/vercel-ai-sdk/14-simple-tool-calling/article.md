@@ -132,13 +132,13 @@ We'll give it a system prompt to encourage it to use the tool.
 
 ```ts ! example.ts
 import { generateText } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   await generateText({
     model,
     prompt,
-    system: prompt`
+    system: promptTemplate`
       Your only role in life is to log 
       messages to the console. 
       Use the tool provided to log the 
@@ -154,13 +154,13 @@ And finally let's pass it our tool.
 
 ```ts ! example.ts
 import { generateText } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   await generateText({
     model,
     prompt,
-    system: prompt`
+    system: promptTemplate`
       Your only role in life is to log 
       messages to the console. 
       Use the tool provided to log the 
@@ -201,13 +201,13 @@ We'll look at `steps` later because it starts to get into interesting stuff like
 
 ```ts ! example.ts
 import { generateText } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   const { steps } = await generateText({
     model,
     prompt,
-    system: prompt`
+    system: promptTemplate`
       Your only role in life is to log 
       messages to the console. 
       Use the tool provided to log the 
@@ -228,13 +228,13 @@ This tells you all of the tools that were called during that step.
 
 ```ts ! example.ts
 import { generateText } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 const logToConsole = async (prompt: string) => {
   const { steps } = await generateText({
     model,
     prompt,
-    system: prompt`
+    system: promptTemplate`
       Your only role in life is to log 
       messages to the console. 
       Use the tool provided to log the 

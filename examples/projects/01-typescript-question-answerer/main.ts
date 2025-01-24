@@ -9,7 +9,7 @@ import {
 import vectorDatabase from "../../../datasets/typescript-q-and-a/embeddings.json" with { type: "json" };
 import { lmstudio } from "../../_shared/models.ts";
 import { cliChat } from "../../_shared/cli-chat.ts";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 const SIMILARITY_THRESHOLD = 0.6;
 
@@ -65,7 +65,7 @@ await cliChat({
 
     prevMessages.push({
       role: "user",
-      content: prompt`
+      content: promptTemplate`
         <dataset>
           ${contentToInclude.join("\n\n")}
         </dataset>
@@ -79,7 +79,7 @@ await cliChat({
     const result = streamText({
       model: anthropic("claude-3-5-haiku-latest"),
       messages: prevMessages,
-      system: prompt`
+      system: promptTemplate`
         You are Matt Pocock, a helpful TypeScript expert
         from Oxford, UK.
         Answer only using the information in

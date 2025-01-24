@@ -1,11 +1,11 @@
 import { generateText, tool } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 import { z } from "zod";
 import { smallModel } from "../../_shared/models.ts";
 
 const model = smallModel;
 
-const systemPrompt = prompt`
+const systemPrompt = promptTemplate`
   You are interacting with the Star Wars API.
   Use the tools provided to fetch data from the API.
   Make a plan to find the data, then enact that plan step-by-step.

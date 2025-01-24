@@ -18,7 +18,7 @@ Doing that in Vercel's AI SDK is as simple as passing a `system` property.
 const { text } = await generateText({
   model,
   prompt: input,
-  system: prompt`
+  system: promptTemplate`
     You are a text summarizer.
     Summarize the text you receive.
     Be concise.
@@ -42,7 +42,7 @@ const { text } = await generateText({
   messages: [
     {
       role: "system",
-      content: prompt`
+      content: promptTemplate`
         You are a text summarizer.
         Summarize the text you receive.
         Be concise.

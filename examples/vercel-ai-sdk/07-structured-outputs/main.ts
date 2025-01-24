@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 import { z } from "zod";
 import { smallToolCallingModel } from "../../_shared/models.ts";
 
@@ -32,7 +32,7 @@ export const createRecipe = async (prompt: string) => {
     schema,
     prompt,
     schemaName: "Recipe",
-    system: prompt`
+    system: promptTemplate`
       You are helping a user create a recipe.
       Use British English variants of ingredient names,
       like Coriander over Cilantro.

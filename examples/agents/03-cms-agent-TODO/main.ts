@@ -5,7 +5,7 @@ import { smallToolCallingModel } from "../../_shared/models.ts";
 import { createCmsClient } from "./client.ts";
 import { seedDatabase } from "./seed.ts";
 import { startServer } from "./server.ts";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 
 // Setup code
@@ -17,7 +17,7 @@ await cliChat({
   answerQuestion: async (question, messages) => {
     const result = await streamText({
       model: smallToolCallingModel,
-      system: prompt`
+      system: promptTemplate`
         You are a content management agent
         You help to update a CMS based on user input.
       `,

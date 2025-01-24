@@ -24,7 +24,7 @@ export const classifySentiment = async (
     model,
     output: "enum",
     prompt: text,
-    system: prompt`
+    system: promptTemplate`
       Classify the sentiment of the text as either 
       positive, negative, or neutral.
     `,
@@ -47,7 +47,7 @@ export const classifySentiment = async (
     output: "enum",
     enum: ["positive", "negative", "neutral"],
     prompt: text,
-    system: prompt`
+    system: promptTemplate`
       Classify the sentiment of the text as either 
       positive, negative, or neutral.
     `,
@@ -70,7 +70,7 @@ export const classifySentiment = async (
     output: "enum",
     enum: ["positive", "negative", "neutral"],
     prompt: text,
-    system: prompt`
+    system: promptTemplate`
       Classify the sentiment of the text as either 
       positive, negative, or neutral.
     `,

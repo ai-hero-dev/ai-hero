@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 import { smallModel } from "../../_shared/models.ts";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 const model = smallModel;
 
@@ -10,7 +10,7 @@ export const summarizeText = async (input: string) => {
     messages: [
       {
         role: "system",
-        content: prompt`
+        content: promptTemplate`
           You are a text summarizer.
           Summarize the text you receive.
           Be concise.

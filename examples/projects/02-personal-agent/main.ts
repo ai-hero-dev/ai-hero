@@ -1,6 +1,6 @@
 import { confirm, log, text } from "@clack/prompts";
 import { streamText, tool } from "ai";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 import { inspect } from "node:util";
 import { z } from "zod";
 import {
@@ -194,7 +194,7 @@ await cliChat({
     const result = streamText({
       model: flagshipAnthropicModel,
       messages: messages,
-      system: prompt`
+      system: promptTemplate`
         You have the responsibility for updating the site AI Hero.
         It is a blog teaching AI engineering.
         When mentioning resources (like posts), provide URLs.

@@ -65,7 +65,7 @@ export const extractDataFromInvoice = async (
 ) => {
   await generateObject({
     model,
-    system: prompt`
+    system: promptTemplate`
       You will receive an invoice.
       Please extract the data from the invoice.
     `,
@@ -89,7 +89,7 @@ export const extractDataFromInvoice = async (
 ) => {
   await generateObject({
     model,
-    system: prompt`
+    system: promptTemplate`
       You will receive an invoice.
       Please extract the data from the invoice.
     `,
@@ -122,7 +122,7 @@ export const extractDataFromInvoice = async (
 ) => {
   await generateObject({
     model,
-    system: prompt`
+    system: promptTemplate`
       You will receive an invoice.
       Please extract the data from the invoice.
     `,
@@ -156,7 +156,7 @@ export const extractDataFromInvoice = async (
 ) => {
   const { object } = await generateObject({
     model,
-    system: prompt`
+    system: promptTemplate`
       You will receive an invoice.
       Please extract the data from the invoice.
     `,

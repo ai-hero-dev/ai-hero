@@ -1,7 +1,7 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { streamText, tool } from "ai";
 import { z } from "zod";
-import { prompt } from "@promptbook/utils";
+import { promptTemplate } from "@promptbook/utils";
 
 // const smallModel = anthropic(
 //   "claude-3-5-haiku-latest",
@@ -16,7 +16,7 @@ const handleInput = async (prompt: string) => {
   const plan = await streamText({
     model: largeModel,
     prompt,
-    system: prompt`
+    system: promptTemplate`
       You are an agent tasked with helping a 
       software developer perform their daily tasks.
       You can help them with git actions.
@@ -38,7 +38,7 @@ const handleInput = async (prompt: string) => {
               "A step-by-step guide to what you want the agent to do.",
             ),
         }),
-        description: prompt`
+        description: promptTemplate`
           Ask a separate agent to perform a git action.
           Provide a list of steps.
           The agent will execute them.

@@ -121,7 +121,7 @@ export const createRecipe = async (prompt: string) => {
     model,
     schema,
     prompt,
-    system: prompt`
+    system: promptTemplate`
       You are helping a user create a recipe.
       Use British English variants of ingredient names,
       like Coriander over Cilantro.
@@ -172,7 +172,7 @@ And finally, we can pass a `schemaName` property to the `generateObject` functio
 ```ts
 const { object } = await generateObject({
   model,
-  system: prompt`
+  system: promptTemplate`
     You are helping a user create a recipe.
     Use British English variants of ingredient names, like Coriander over Cilantro.
   `,

@@ -99,7 +99,7 @@ await generateText({
 
 ## Pass Message History
 
-Pass `messages` instead of `prompt`.
+Pass `messages` instead of `promptTemplate`.
 
 ```ts
 import { generateText } from "ai";

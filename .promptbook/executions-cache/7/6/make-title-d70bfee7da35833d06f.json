@@ -1,0 +1,115 @@
+{
+    "date": "2025-01-23T14:48:50.639Z",
+    "promptbookVersion": "0.84.0-9",
+    "prompt": {
+        "title": "Make title",
+        "pipelineUrl": "https://promptbook.studio/promptbook/prepare-title.book.md#make-title",
+        "parameters": {
+            "book": "./joke-generator.book.md"
+        },
+        "content": "Make best title for given text which describes the workflow:\n\n## Rules\n\n-   Write just title, nothing else\n-   Title should be concise and clear - Write maximum ideally 2 words, maximum 5 words\n-   Title starts with emoticon\n-   Title should not mention the input and output of the workflow but the main purpose of the workflow\n    _For example, not \"✍ Convert Knowledge-piece to title\" but \"✍ Title\"_\n\n## The workflow\n\n> {book}",
+        "modelRequirements": {
+            "modelVariant": "CHAT"
+        },
+        "expectations": {
+            "words": {
+                "min": 1,
+                "max": 8
+            },
+            "lines": {
+                "min": 1,
+                "max": 1
+            }
+        }
+    },
+    "promptResult": {
+        "content": "😂 Joke Factory",
+        "modelName": "claude-3-5-sonnet-20240620",
+        "timing": {
+            "start": "2025-01-23T14:48:49.367Z",
+            "complete": "2025-01-23T14:48:50.637Z"
+        },
+        "usage": {
+            "price": {
+                "value": 0.000522
+            },
+            "input": {
+                "tokensCount": {
+                    "value": 124
+                },
+                "charactersCount": {
+                    "value": 446
+                },
+                "wordsCount": {
+                    "value": 70
+                },
+                "sentencesCount": {
+                    "value": 4
+                },
+                "linesCount": {
+                    "value": 12
+                },
+                "paragraphsCount": {
+                    "value": 5
+                },
+                "pagesCount": {
+                    "value": 1
+                }
+            },
+            "output": {
+                "tokensCount": {
+                    "value": 10
+                },
+                "charactersCount": {
+                    "value": 14
+                },
+                "wordsCount": {
+                    "value": 3
+                },
+                "sentencesCount": {
+                    "value": 1
+                },
+                "linesCount": {
+                    "value": 1
+                },
+                "paragraphsCount": {
+                    "value": 1
+                },
+                "pagesCount": {
+                    "value": 1
+                }
+            }
+        },
+        "rawPromptContent": "Make best title for given text which describes the workflow:\n\n## Rules\n\n-   Write just title, nothing else\n-   Title should be concise and clear - Write maximum ideally 2 words, maximum 5 words\n-   Title starts with emoticon\n-   Title should not mention the input and output of the workflow but the main purpose of the workflow\n    _For example, not \"✍ Convert Knowledge-piece to title\" but \"✍ Title\"_\n\n## The workflow\n\n> ./joke-generator.book.md",
+        "rawRequest": {
+            "model": "claude-3-5-sonnet-20240620",
+            "max_tokens": 4096,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Make best title for given text which describes the workflow:\n\n## Rules\n\n-   Write just title, nothing else\n-   Title should be concise and clear - Write maximum ideally 2 words, maximum 5 words\n-   Title starts with emoticon\n-   Title should not mention the input and output of the workflow but the main purpose of the workflow\n    _For example, not \"✍ Convert Knowledge-piece to title\" but \"✍ Title\"_\n\n## The workflow\n\n> ./joke-generator.book.md"
+                }
+            ]
+        },
+        "rawResponse": {
+            "id": "msg_01KqaCVwmNxziW16woULbzS4",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude-3-5-sonnet-20240620",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "😂 Joke Factory"
+                }
+            ],
+            "stop_reason": "end_turn",
+            "stop_sequence": null,
+            "usage": {
+                "input_tokens": 124,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 0,
+                "output_tokens": 10
+            }
+        }
+    }
+}
