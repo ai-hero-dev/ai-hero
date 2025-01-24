@@ -4,6 +4,7 @@
     "v": "vercel-ai-sdk",
     "ai-sdk": "vercel-ai-sdk",
     "p": "projects",
-    "a": "agents"
+    "a": "agents",
+    "ui": "ui-patterns"
   }
 }

@@ -16,8 +16,7 @@ export const cliChat = async <
    */
   dollarsPerMillionTokens?: number;
   answerQuestion: (
-    question: string,
-    prevMessages: CoreMessage[],
+    messages: CoreMessage[],
   ) => Promise<StreamTextResult<T, U>>;
   processQuestionResults?: (opts: {
     messages: CoreMessage[];
@@ -40,10 +39,12 @@ export const cliChat = async <
 
     exitProcessIfCancel(question);
 
-    const result = await opts.answerQuestion(
-      question,
-      messages,
-    );
+    messages.push({
+      role: "user",
+      content: question,
+    });
+
+    const result = await opts.answerQuestion(messages);
 
     p.log.message("");
 
@@ -85,3 +86,27 @@ export function exitProcessIfCancel<T>(
     process.exit(0);
   }
 }
+
+export const wrapWithSpinner =
+  <TFunc extends (...args: any[]) => Promise<any>>(
+    opts: {
+      startMessage: string;
+      stopMessage: string;
+    },
+    func: TFunc,
+  ) =>
+  async (
+    ...args: Parameters<TFunc>
+  ): Promise<Awaited<ReturnType<TFunc>>> => {
+    const spin = p.spinner();
+    spin.start(opts.startMessage);
+
+    try {
+      const result = await func(...args);
+      spin.stop(opts.stopMessage);
+      return result;
+    } catch (err) {
+      spin.stop("❌ Error occurred");
+      throw err;
+    }
+  };

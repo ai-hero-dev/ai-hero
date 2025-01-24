@@ -20,8 +20,14 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "noEmit": true,
+    "jsx": "react-jsx",
 
-    "lib": ["ESNext"]
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable",
+      "DOM.AsyncIterable"
+    ]
   },
   "exclude": ["./examples"]
 }
