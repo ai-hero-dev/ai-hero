@@ -1,4 +1,31 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "presentation-mode.configBackup": {
+    "editor.rulers": "undefined",
+    "eslint.enable": "undefined",
+    "explorer.autoReveal": "undefined",
+    "workbench.statusBar.visible": "undefined",
+    "workbench.editor.showTabs": "undefined",
+    "editor.lineNumbers": "undefined",
+    "editor.folding": "undefined",
+    "github.copilot.enable": "undefined",
+    "workbench.colorCustomizations": "undefined",
+    "explorer.fileNesting.patterns": "undefined",
+    "explorer.compactFolders": "undefined",
+    "breadcrumbs.filePath": "undefined",
+    "workbench.startupEditor": "undefined",
+    "editor.lightbulb.enabled": "undefined",
+    "editor.renderLineHighlight": "undefined",
+    "editor.guides.highlightActiveIndentation": "undefined",
+    "editor.guides.indentation": "undefined",
+    "editor.guides.highlightActiveBracketPair": "undefined",
+    "editor.matchBrackets": "undefined",
+    "editor.occurrencesHighlight": "undefined",
+    "editor.selectionHighlight": "undefined",
+    "workbench.colorTheme": "undefined",
+    "zenMode.showTabs": "undefined",
+    "workbench.editor.labelFormat": "undefined",
+    "window.autoDetectColorScheme": "undefined"
+  }
 }

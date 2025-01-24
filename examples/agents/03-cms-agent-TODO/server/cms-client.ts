@@ -1,3 +1,5 @@
+import { setTimeout } from "node:timers/promises";
+
 interface Post {
   id: string;
   title: string;
@@ -6,21 +8,23 @@ interface Post {
   updatedAt?: string;
 }
 
-type PostWithoutContent = Omit<Post, "content">;
-
 const API_URL = "http://localhost:4317";
 
 export class CmsClient {
   async createPost(
     data: Pick<Post, "title" | "content">,
   ): Promise<Post> {
-    const response = await fetch(`${API_URL}/posts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    await setTimeout(500);
+    const response = await fetch(
+      `${API_URL}/api/cms/posts`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       },
-      body: JSON.stringify(data),
-    });
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -31,12 +35,15 @@ export class CmsClient {
     return response.json() as any;
   }
 
-  async getAllPosts(): Promise<PostWithoutContent[]> {
-    const response = await fetch(`${API_URL}/posts`);
+  async getAllPosts(): Promise<Post[]> {
+    await setTimeout(500);
+    const response = await fetch(
+      `${API_URL}/api/cms/posts`,
+    );
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch posts: ${response.statusText}`,
+        `Failed to fetch api/cms/posts: ${response.statusText}`,
       );
     }
 
@@ -44,8 +51,9 @@ export class CmsClient {
   }
 
   async getPost(id: string): Promise<Post> {
+    await setTimeout(500);
     const response = await fetch(
-      `${API_URL}/posts/${id}`,
+      `${API_URL}/api/cms/posts/${id}`,
     );
 
     if (!response.ok) {
@@ -64,8 +72,9 @@ export class CmsClient {
     id: string,
     data: Partial<Pick<Post, "title" | "content">>,
   ): Promise<Post> {
+    await setTimeout(500);
     const response = await fetch(
-      `${API_URL}/posts/${id}`,
+      `${API_URL}/api/cms/posts/${id}`,
       {
         method: "PUT",
         headers: {
@@ -90,8 +99,9 @@ export class CmsClient {
   async deletePost(
     id: string,
   ): Promise<{ success: boolean }> {
+    await setTimeout(500);
     const response = await fetch(
-      `${API_URL}/posts/${id}`,
+      `${API_URL}/api/cms/posts/${id}`,
       {
         method: "DELETE",
       },

@@ -1,4 +1,4 @@
-import { createCmsClient } from "./client.ts";
+import { createCmsClient } from "./cms-client.ts";
 
 const posts = [
   {

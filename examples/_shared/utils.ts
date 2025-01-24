@@ -1,3 +1,6 @@
+import type { CoreTool } from "ai";
+import type { z } from "zod";
+
 /**
  * Matt here!
  *
@@ -7,4 +10,17 @@
  */
 export const getLocalhost = () => {
   return process.env.LOCALHOST_OVERRIDE || "localhost";
+};
+
+type GetZodObjectFromCoreTool<T> =
+  T extends CoreTool<infer Z extends z.ZodType>
+    ? z.infer<Z>
+    : never;
+
+export type GetToolExecutionMapFromTools<
+  TTools extends Record<string, CoreTool<any>>,
+> = {
+  [K in keyof TTools]?: (
+    args: GetZodObjectFromCoreTool<TTools[K]>,
+  ) => Promise<any>;
 };
