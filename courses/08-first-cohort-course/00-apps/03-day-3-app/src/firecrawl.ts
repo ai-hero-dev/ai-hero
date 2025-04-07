@@ -12,6 +12,7 @@ type CrawlError = {
 type CrawlResult = {
   markdown: string | undefined;
   url: string | undefined;
+  title: string | undefined;
 };
 
 export const crawlMultipleUrls = async (
@@ -26,6 +27,7 @@ export const crawlMultipleUrls = async (
       return {
         markdown: result.markdown,
         url: result.url,
+        title: result.title,
       };
     });
   } else {

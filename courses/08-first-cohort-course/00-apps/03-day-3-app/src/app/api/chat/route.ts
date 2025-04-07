@@ -1,4 +1,4 @@
-import type { Message } from "ai";
+import type { LanguageModelV1, Message } from "ai";
 import {
   streamText,
   createDataStreamResponse,
@@ -10,6 +10,10 @@ import { searchSerper } from "~/serper";
 import { scrapePages } from "~/tools/scrape-pages";
 import { z } from "zod";
 import { upsertChat } from "~/server/db/queries";
+import type {
+  LanguageModelV1Source,
+  MessagePart,
+} from "~/components/chat-message";
 
 export const maxDuration = 60;
 
@@ -48,6 +52,13 @@ export async function POST(request: Request) {
         });
       }
 
+      const sourceParts: LanguageModelV1Source[] = [];
+
+      const recordSource = (source: LanguageModelV1Source) => {
+        sourceParts.push(source);
+        dataStream.writeSource(source);
+      };
+
       const result = streamText({
         model,
         messages,
@@ -77,6 +88,15 @@ IMPORTANT INSTRUCTIONS:
                 abortSignal,
               );
 
+              results.organic.forEach((result) => {
+                recordSource({
+                  id: crypto.randomUUID(),
+                  sourceType: "url",
+                  title: result.title,
+                  url: result.link,
+                });
+              });
+
               return results.organic.map((result) => ({
                 title: result.title,
                 link: result.link,
@@ -91,7 +111,24 @@ IMPORTANT INSTRUCTIONS:
                 .describe("The URLs of the pages to scrape"),
             }),
             execute: async ({ urls }) => {
-              return scrapePages(urls);
+              const result = await scrapePages(urls);
+
+              if ("error" in result) {
+                return {
+                  error: result.error,
+                };
+              }
+
+              result.forEach((r) => {
+                recordSource({
+                  id: crypto.randomUUID(),
+                  sourceType: "url",
+                  title: r.title,
+                  url: r.url ?? "",
+                });
+              });
+
+              return result;
             },
           },
         },
@@ -101,6 +138,15 @@ IMPORTANT INSTRUCTIONS:
             messages,
             responseMessages,
           });
+
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+
+          lastMessage?.parts?.push(
+            ...sourceParts.map((source) => ({
+              type: "source" as const,
+              source,
+            })),
+          );
 
           // Update the chat with all messages
           await upsertChat({

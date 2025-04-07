@@ -3,6 +3,10 @@ import type { Message } from "ai";
 
 export type MessagePart = NonNullable<Message["parts"]>[number];
 
+export type LanguageModelV1Source = (NonNullable<Message["parts"]>[number] & {
+  type: "source";
+})["source"];
+
 interface ChatMessageProps {
   parts: MessagePart[] | undefined;
   role: string;
@@ -73,6 +77,8 @@ const ToolInvocation = ({
 export const ChatMessage = ({ parts, role, userName }: ChatMessageProps) => {
   const isAI = role === "assistant";
 
+  const sources = parts?.filter((part) => part.type === "source") ?? [];
+
   return (
     <div className="mb-6">
       <div
@@ -90,18 +96,40 @@ export const ChatMessage = ({ parts, role, userName }: ChatMessageProps) => {
               return <Markdown key={index}>{part.text}</Markdown>;
             }
 
-            if (part.type === "tool-invocation") {
-              return (
-                <ToolInvocation
-                  key={index}
-                  toolInvocation={part.toolInvocation}
-                />
-              );
-            }
+            // if (part.type === "tool-invocation") {
+            //   return (
+            //     <ToolInvocation
+            //       key={index}
+            //       toolInvocation={part.toolInvocation}
+            //     />
+            //   );
+            // }
 
             return null;
           })}
         </div>
+
+        {sources.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2">
+            {sources?.map((part) => {
+              const displayUrl = part.source.url.startsWith("http")
+                ? new URL(part.source.url).hostname
+                : part.source.url;
+
+              return (
+                <a
+                  className="font-mono text-xs text-gray-400"
+                  href={part.source.url}
+                  key={part.source.id}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {displayUrl}
+                </a>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
