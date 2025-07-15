@@ -68,7 +68,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <ChatPage userName={userName} />
+      <ChatPage userName={userName} isAuthenticated={isAuthenticated} />
     </div>
   );
 }
