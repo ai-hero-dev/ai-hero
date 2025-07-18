@@ -77,6 +77,7 @@ Please follow these guidelines:
 If you cannot answer, explain why.
 `,
         maxSteps: 10,
+        experimental_telemetry: { isEnabled: true },
         async onFinish({ response }) {
           // Merge the streamed response messages with the original messages
           const updatedMessages = appendResponseMessages({
