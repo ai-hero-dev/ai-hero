@@ -48,13 +48,6 @@ export async function POST(request: Request) {
   const langfuse = new Langfuse({
     environment: env.NODE_ENV,
   });
-  const rateLimitResult = await checkRateLimit(userId);
-  if (!rateLimitResult.allowed) {
-    return new Response(rateLimitResult.error || "Too Many Requests", {
-      status: rateLimitResult.error === "Too Many Requests" ? 429 : 401,
-    });
-  }
-
   const body = (await request.json()) as {
     messages: Array<Message>;
     chatId?: string;
@@ -71,21 +64,56 @@ export async function POST(request: Request) {
     isNewChat = !body.chatId;
   }
 
-  // Create Langfuse trace with sessionId as chatId, name 'chat', and userId
+  // Create the trace after chatId is set
   const trace = langfuse.trace({
-    sessionId: chatId,
+    sessionId: chatId ?? undefined,
     name: "chat",
     userId: userId,
   });
 
-  // Always create or update the chat before streaming, to ensure it exists
-  // Use a default title for new chats
-  await upsertChat({
-    userId,
-    chatId,
-    title: messages.at(-1)?.content.slice(0, 10) ?? "New chat",
-    messages,
+  // --- DB CALL: checkRateLimit ---
+  const checkRateLimitSpan = trace.span({
+    name: "db-check-rate-limit",
+    input: { userId },
   });
+  let rateLimitResult;
+  try {
+    rateLimitResult = await checkRateLimit(userId);
+    checkRateLimitSpan.end({ output: rateLimitResult });
+  } catch (error) {
+    checkRateLimitSpan.end({ output: { error: String(error) } });
+    throw error;
+  }
+  if (!rateLimitResult.allowed) {
+    return new Response(rateLimitResult.error || "Too Many Requests", {
+      status: rateLimitResult.error === "Too Many Requests" ? 429 : 401,
+    });
+  }
+
+  // --- DB CALL: upsertChat (initial) ---
+  const upsertChatInitialSpan = trace.span({
+    name: "db-upsert-chat-initial",
+    input: {
+      userId,
+      chatId,
+      title: messages.at(-1)?.content.slice(0, 10) ?? "New chat",
+      messages,
+    },
+  });
+  try {
+    await upsertChat({
+      userId,
+      chatId,
+      title: messages.at(-1)?.content.slice(0, 10) ?? "New chat",
+      messages,
+    });
+    upsertChatInitialSpan.end({ output: { success: true } });
+  } catch (error) {
+    upsertChatInitialSpan.end({ output: { error: String(error) } });
+    throw error;
+  }
+  // If chatId was generated, update the trace's sessionId
+  trace.update({ sessionId: chatId });
 
   return createDataStreamResponse({
     execute: async (dataStream) => {
@@ -118,13 +146,28 @@ export async function POST(request: Request) {
             responseMessages: response.messages,
           });
 
-          // Save the updated messages to the database, replacing all previous messages
-          await upsertChat({
-            userId,
-            chatId: chatId!,
-            title: updatedMessages.at(-1)?.content.slice(0, 10) ?? "New Chat",
-            messages: updatedMessages,
+          // --- DB CALL: upsertChat (final) ---
+          const upsertChatFinalSpan = trace.span({
+            name: "db-upsert-chat-final",
+            input: {
+              userId,
+              chatId: chatId!,
+              title: updatedMessages.at(-1)?.content.slice(0, 10) ?? "New Chat",
+              messages: updatedMessages,
+            },
           });
+          try {
+            await upsertChat({
+              userId,
+              chatId: chatId!,
+              title: updatedMessages.at(-1)?.content.slice(0, 10) ?? "New Chat",
+              messages: updatedMessages,
+            });
+            upsertChatFinalSpan.end({ output: { success: true } });
+          } catch (error) {
+            upsertChatFinalSpan.end({ output: { error: String(error) } });
+            throw error;
+          }
           await langfuse.flushAsync();
         },
       });
