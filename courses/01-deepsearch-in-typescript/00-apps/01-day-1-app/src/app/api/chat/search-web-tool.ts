@@ -18,6 +18,7 @@ export const searchWeb = {
       title: result.title,
       link: result.link,
       snippet: result.snippet,
+      date: result.date, // Add the date field
     }));
   },
 };
