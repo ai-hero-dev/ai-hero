@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { searchSerper } from "~/serper";
+import { bulkCrawlWebsites } from "~/scraper";
 
 export const searchWeb = {
   parameters: z.object({
@@ -18,5 +19,20 @@ export const searchWeb = {
       link: result.link,
       snippet: result.snippet,
     }));
+  },
+};
+
+export const scrapePages = {
+  parameters: z.object({
+    urls: z
+      .array(z.string())
+      .describe("A list of URLs to scrape for full page content."),
+  }),
+  execute: async (
+    { urls }: { urls: string[] },
+    _options: { abortSignal?: AbortSignal },
+  ) => {
+    const result = await bulkCrawlWebsites({ urls });
+    return result;
   },
 };
