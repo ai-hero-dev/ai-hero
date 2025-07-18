@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     userId: userId,
   });
 
-  // --- DB CALL: checkRateLimit ---
+  // --- DB CALL: checkRateLimit (user-specific) ---
   const checkRateLimitSpan = trace.span({
     name: "db-check-rate-limit",
     input: { userId },
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
           chatId,
         });
       }
-      const result = streamFromDeepSearch({
+      const result = await streamFromDeepSearch({
         messages,
         onFinish: async ({ response }) => {
           // Merge the streamed response messages with the original messages
