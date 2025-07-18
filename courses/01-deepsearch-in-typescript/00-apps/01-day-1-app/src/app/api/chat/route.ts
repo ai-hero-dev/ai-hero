@@ -9,6 +9,8 @@ import { auth } from "~/server/auth/index.ts";
 import { searchWeb } from "./search-web-tool";
 import { checkRateLimit, upsertChat } from "~/server/db/queries";
 import { nanoid } from "nanoid";
+import { Langfuse } from "langfuse";
+import { env } from "~/env";
 
 export const maxDuration = 60;
 
@@ -19,6 +21,9 @@ export async function POST(request: Request) {
   }
 
   const userId = session.user.id;
+  const langfuse = new Langfuse({
+    environment: env.NODE_ENV,
+  });
   const rateLimitResult = await checkRateLimit(userId);
   if (!rateLimitResult.allowed) {
     return new Response(rateLimitResult.error || "Too Many Requests", {
@@ -41,6 +46,13 @@ export async function POST(request: Request) {
   if (typeof isNewChat !== "boolean") {
     isNewChat = !body.chatId;
   }
+
+  // Create Langfuse trace with sessionId as chatId, name 'chat', and userId
+  const trace = langfuse.trace({
+    sessionId: chatId,
+    name: "chat",
+    userId: userId,
+  });
 
   // Always create or update the chat before streaming, to ensure it exists
   // Use a default title for new chats
@@ -71,13 +83,19 @@ Please follow these guidelines:
 
 - Always use the \`searchWeb\` tool to answer user questions.
 - Be thorough in your answers, but concise.
-- Always cite your sources with inline links, for example "The [answer](link) is...".
+- Always cite your sources.
 - Always respond in markdown and format the response in a clear, visually appealing way.
 
 If you cannot answer, explain why.
 `,
         maxSteps: 10,
-        experimental_telemetry: { isEnabled: true },
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: `agent`,
+          metadata: {
+            langfuseTraceId: trace.id,
+          },
+        },
         async onFinish({ response }) {
           // Merge the streamed response messages with the original messages
           const updatedMessages = appendResponseMessages({
@@ -92,6 +110,7 @@ If you cannot answer, explain why.
             title: updatedMessages.at(-1)?.content.slice(0, 10) ?? "New Chat",
             messages: updatedMessages,
           });
+          await langfuse.flushAsync();
         },
       });
 

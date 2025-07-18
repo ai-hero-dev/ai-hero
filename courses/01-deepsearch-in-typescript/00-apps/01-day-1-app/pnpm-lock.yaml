@@ -47,6 +47,9 @@ importers:
       jstoxml:
         specifier: ^5.0.2
         version: 5.0.2
+      langfuse:
+        specifier: ^3.38.4
+        version: 3.38.4
       langfuse-vercel:
         specifier: ^3.38.4
         version: 3.38.4(ai@4.3.18(react@18.3.1)(zod@3.24.1))
