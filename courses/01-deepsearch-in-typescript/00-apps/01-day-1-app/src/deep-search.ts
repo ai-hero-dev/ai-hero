@@ -1,7 +1,7 @@
 import { streamText, type Message, type TelemetrySettings } from "ai";
 import { model } from "./model";
 import { searchWeb, scrapePages } from "./app/api/chat/search-web-tool";
-import { SYSTEM_PROMPT } from "./system-prompt";
+import { systemPrompt } from "./system-prompt";
 import { checkRateLimit, recordRateLimit } from "./server/redis/rate-limit";
 
 export const streamFromDeepSearch = async (opts: {
@@ -36,7 +36,7 @@ export const streamFromDeepSearch = async (opts: {
     model,
     messages: opts.messages,
     maxSteps: 10,
-    system: SYSTEM_PROMPT.replace("{date}", new Date().toISOString()),
+    system: systemPrompt.replace("{date}", new Date().toISOString()),
     tools: { searchWeb, scrapePages },
     onFinish: opts.onFinish,
     experimental_telemetry: opts.telemetry,
