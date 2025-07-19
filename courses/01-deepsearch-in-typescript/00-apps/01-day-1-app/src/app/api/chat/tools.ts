@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { searchSerper } from "~/serper";
-import { bulkCrawlWebsites } from "~/scraper";
+import { searchSerper } from "~/lib/serper";
+import { bulkCrawlWebsites } from "~/lib/scraper";
 
 export const searchWeb = {
   parameters: z.object({

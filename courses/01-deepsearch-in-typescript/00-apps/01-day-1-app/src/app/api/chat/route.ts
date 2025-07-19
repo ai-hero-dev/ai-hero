@@ -5,7 +5,7 @@ import { checkRateLimit, upsertChat } from "~/server/db/queries";
 import { nanoid } from "nanoid";
 import { Langfuse } from "langfuse";
 import { env } from "~/env";
-import { streamFromDeepSearch } from "~/deep-search";
+import { streamFromDeepSearch } from "./deep-search";
 
 export const maxDuration = 60;
 

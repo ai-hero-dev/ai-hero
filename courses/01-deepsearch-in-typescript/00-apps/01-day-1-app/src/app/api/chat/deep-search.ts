@@ -1,8 +1,8 @@
 import { streamText, type Message, type TelemetrySettings } from "ai";
-import { model } from "./model";
-import { searchWeb, scrapePages } from "./app/api/chat/search-web-tool";
+import { model } from "~/app/api/chat/model";
+import { searchWeb, scrapePages } from "./tools";
 import { systemPrompt } from "./system-prompt";
-import { checkRateLimit, recordRateLimit } from "./server/redis/rate-limit";
+import { checkRateLimit, recordRateLimit } from "~/server/redis/rate-limit";
 
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];

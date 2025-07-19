@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { isNewChatCreated } from "~/utils";
+import { isNewChatCreated } from "~/lib/is-new-chat-created";
 import type { Message } from "ai";
 import { StickToBottom } from "use-stick-to-bottom";
 
