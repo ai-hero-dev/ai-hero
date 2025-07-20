@@ -20,6 +20,7 @@ export const env = createEnv({
     AUTH_DISCORD_ID: z.string(),
     AUTH_DISCORD_SECRET: z.string(),
     SERPER_API_KEY: z.string(),
+    EVAL_DATASET: z.enum(["dev", "ci", "regression"]).default("dev").optional(),
   },
 
   /**
@@ -42,6 +43,7 @@ export const env = createEnv({
     AUTH_DISCORD_ID: process.env.AUTH_DISCORD_ID,
     AUTH_DISCORD_SECRET: process.env.AUTH_DISCORD_SECRET,
     SERPER_API_KEY: process.env.SERPER_API_KEY,
+    EVAL_DATASET: process.env.EVAL_DATASET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
