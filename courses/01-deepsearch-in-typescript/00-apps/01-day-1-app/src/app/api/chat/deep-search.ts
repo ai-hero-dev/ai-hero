@@ -3,6 +3,7 @@ import { model } from "~/app/api/chat/model";
 import { searchWeb, scrapePages } from "./tools";
 import { systemPrompt } from "./system-prompt";
 import { checkRateLimit, recordRateLimit } from "~/server/redis/rate-limit";
+import { env } from "~/env";
 
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
@@ -11,10 +12,10 @@ export const streamFromDeepSearch = async (opts: {
 }) => {
   // Global rate limiting configuration
   const config = {
-    maxRequests: 10, // Allow 10 requests per minute
-    maxRetries: 3,
-    windowMs: 60_000, // 1 minute window
-    keyPrefix: "global_llm",
+    maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
+    maxRetries: env.RATE_LIMIT_MAX_RETRIES,
+    windowMs: env.RATE_LIMIT_WINDOW_MS,
+    keyPrefix: env.RATE_LIMIT_KEY_PREFIX,
   };
 
   // Check the rate limit

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { searchSerper } from "~/lib/serper";
 import { bulkCrawlWebsites } from "~/lib/scraper";
+import { env } from "~/env";
 
 export const searchWeb = {
   parameters: z.object({
@@ -11,7 +12,7 @@ export const searchWeb = {
     options: { abortSignal?: AbortSignal },
   ) => {
     const results = await searchSerper(
-      { q: query, num: 10 },
+      { q: query, num: env.SEARCH_RESULTS_COUNT },
       options.abortSignal,
     );
     return results.organic.map((result) => ({

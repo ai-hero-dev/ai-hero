@@ -3,6 +3,7 @@ import { chats, messages, userRequests } from "./schema";
 import { eq, and, gte, lt } from "drizzle-orm";
 import type { Message as AIMessage } from "ai";
 import { nanoid } from "nanoid";
+import { env } from "~/env";
 
 export const upsertChat = async (opts: {
   userId: string;
@@ -75,7 +76,7 @@ export const getChats = async (opts: { userId: string }) => {
   });
 };
 
-const DAILY_LIMIT = 1000;
+const DAILY_LIMIT = env.DB_DAILY_LIMIT;
 
 export async function checkRateLimit(userId: string) {
   // Get user from DB to check admin status

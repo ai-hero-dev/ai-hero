@@ -3,8 +3,9 @@ import { setTimeout } from "node:timers/promises";
 import robotsParser from "robots-parser";
 import TurndownService from "turndown";
 import { cacheWithRedis } from "~/server/redis/redis";
+import { env } from "~/env";
 
-export const DEFAULT_MAX_RETRIES = 3;
+export const DEFAULT_MAX_RETRIES = env.SCRAPER_MAX_RETRIES;
 const MIN_DELAY_MS = 500; // 0.5 seconds
 const MAX_DELAY_MS = 8000; // 8 seconds
 
