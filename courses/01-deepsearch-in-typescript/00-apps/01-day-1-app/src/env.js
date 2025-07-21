@@ -29,6 +29,7 @@ export const env = createEnv({
     CACHE_EXPIRY_SECONDS: z.coerce.number().default(21600),
     SCRAPER_MAX_RETRIES: z.coerce.number().default(3),
     DB_DAILY_LIMIT: z.coerce.number().default(1000),
+    SCRAPE_PAGES_COUNT: z.coerce.number().default(3),
   },
 
   /**
@@ -60,6 +61,7 @@ export const env = createEnv({
     CACHE_EXPIRY_SECONDS: process.env.CACHE_EXPIRY_SECONDS,
     SCRAPER_MAX_RETRIES: process.env.SCRAPER_MAX_RETRIES,
     DB_DAILY_LIMIT: process.env.DB_DAILY_LIMIT,
+    SCRAPE_PAGES_COUNT: process.env.SCRAPE_PAGES_COUNT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

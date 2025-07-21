@@ -1,3 +1,5 @@
+import { env } from "~/env.js";
+
 export const systemPrompt = `# Web Search and Citation System Prompt
 
 **Today is {date}**
@@ -22,9 +24,9 @@ You are an AI assistant with access to two tools: \`searchWeb\` and \`scrapePage
 
 ## Workflow
 
-1. Use \`searchWeb\` with relevant keywords
+1. Use searchWeb to find ${env.SEARCH_RESULTS_COUNT} relevant URLs for the user query
 2. Identify the most credible and relevant URLs from search results
-3. Use \`scrapePages\` on 2-3 of the most promising URLs
+3. Use scrapePages on up to ${env.SCRAPE_PAGES_COUNT} of the most promising URLs
 4. **Think step by step**: Analyze and synthesize the information from multiple sources
 5. **Reason through conflicts**: If sources disagree, explain which information appears most reliable and why
 6. Format response with proper inline citations throughout

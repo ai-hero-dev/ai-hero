@@ -6,13 +6,17 @@ import { env } from "~/env";
 export const searchWeb = {
   parameters: z.object({
     query: z.string().describe("The query to search the web for"),
+    num: z
+      .number()
+      .describe("The number of search results to return")
+      .default(env.SEARCH_RESULTS_COUNT),
   }),
   execute: async (
-    { query }: { query: string },
+    { query, num }: { query: string; num?: number },
     options: { abortSignal?: AbortSignal },
   ) => {
     const results = await searchSerper(
-      { q: query, num: env.SEARCH_RESULTS_COUNT },
+      { q: query, num: num ?? env.SEARCH_RESULTS_COUNT },
       options.abortSignal,
     );
     return results.organic.map((result) => ({
