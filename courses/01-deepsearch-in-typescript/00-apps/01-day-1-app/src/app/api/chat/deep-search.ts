@@ -1,15 +1,13 @@
-import { streamText, type Message, type TelemetrySettings } from "ai";
-import { model } from "~/app/api/chat/model";
-import { searchWeb, scrapePages } from "./tools";
-import { systemPrompt } from "./system-prompt";
+import type { Message, TelemetrySettings, StreamTextResult } from "ai";
 import { checkRateLimit, recordRateLimit } from "~/server/redis/rate-limit";
 import { env } from "~/env";
+import { runAgentLoop } from "~/lib/run-agent-loop";
 
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
-  onFinish: Parameters<typeof streamText>[0]["onFinish"];
+  onFinish: (result: { text: string }) => void;
   telemetry: TelemetrySettings;
-}) => {
+}): Promise<StreamTextResult<{}, string>> => {
   // Global rate limiting configuration
   const config = {
     maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
@@ -33,15 +31,11 @@ export const streamFromDeepSearch = async (opts: {
   // Record the request
   await recordRateLimit(config);
 
-  return streamText({
-    model,
-    messages: opts.messages,
-    maxSteps: 10,
-    system: systemPrompt.replace("{date}", new Date().toISOString()),
-    tools: { searchWeb, scrapePages },
-    onFinish: opts.onFinish,
-    experimental_telemetry: opts.telemetry,
-  });
+  // Get the user's question from the last message
+  const userQuestion = opts.messages[opts.messages.length - 1]?.content || "";
+
+  // Run the agent loop and return the result
+  return runAgentLoop(userQuestion);
 };
 
 export async function askDeepSearch(messages: Message[]) {

@@ -96,7 +96,10 @@ export async function POST(request: Request) {
       }
       const result = await streamFromDeepSearch({
         messages,
-        onFinish: async ({ response }) => {
+        onFinish: async ({ text }) => {
+          console.log("onFinish", text);
+        },
+        /*onFinish: async ({ response }) => {
           // Merge the streamed response messages with the original messages
           const updatedMessages = appendResponseMessages({
             messages,
@@ -126,7 +129,7 @@ export async function POST(request: Request) {
             throw error;
           }
           await langfuse.flushAsync();
-        },
+        },*/
         telemetry: {
           isEnabled: true,
           functionId: `agent`,
