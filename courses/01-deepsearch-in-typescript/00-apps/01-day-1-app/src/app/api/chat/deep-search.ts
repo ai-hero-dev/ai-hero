@@ -2,11 +2,13 @@ import type { Message, TelemetrySettings, StreamTextResult } from "ai";
 import { checkRateLimit, recordRateLimit } from "~/server/redis/rate-limit";
 import { env } from "~/env";
 import { runAgentLoop } from "~/lib/run-agent-loop";
+import type { MessageAnnotation } from "~/lib/get-next-action";
 
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
   onFinish: (result: { text: string }) => void;
   telemetry: TelemetrySettings;
+  writeMessageAnnotation?: (annotation: MessageAnnotation) => void;
 }): Promise<StreamTextResult<{}, string>> => {
   // Global rate limiting configuration
   const config = {
@@ -35,7 +37,7 @@ export const streamFromDeepSearch = async (opts: {
   const userQuestion = opts.messages[opts.messages.length - 1]?.content || "";
 
   // Run the agent loop and return the result
-  return runAgentLoop(userQuestion);
+  return runAgentLoop(userQuestion, opts.writeMessageAnnotation);
 };
 
 export async function askDeepSearch(messages: Message[]) {

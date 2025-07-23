@@ -3,7 +3,7 @@ import { searchSerper } from "~/lib/serper";
 import { bulkCrawlWebsites } from "~/lib/scraper";
 import { env } from "~/env";
 import { SystemContext } from "./system-context";
-import { getNextAction } from "./get-next-action";
+import { getNextAction, type MessageAnnotation } from "./get-next-action";
 import { answerQuestion } from "./answer-question";
 
 // Copy of the search function from tools.ts
@@ -22,12 +22,12 @@ const searchWeb = async (query: string) => {
 
 // Copy of the scrape function from tools.ts
 const scrapePages = async (urls: string[]) => {
-  const result = await bulkCrawlWebsites({ urls });
-  return result;
+  return bulkCrawlWebsites({ urls });
 };
 
 export const runAgentLoop = async (
   userQuestion: string,
+  writeMessageAnnotation?: (annotation: MessageAnnotation) => void,
 ): Promise<StreamTextResult<{}, string>> => {
   // A persistent container for the state of our system
   const ctx = new SystemContext(userQuestion);
@@ -37,6 +37,20 @@ export const runAgentLoop = async (
   while (!ctx.shouldStop()) {
     // We choose the next action based on the state of our system
     const nextAction = await getNextAction(ctx);
+
+    // Send annotation about the chosen action
+    if (writeMessageAnnotation) {
+      writeMessageAnnotation({
+        type: "NEW_ACTION",
+        action: {
+          type: nextAction.type,
+          title: nextAction.title,
+          reasoning: nextAction.reasoning,
+          query: nextAction.query,
+          urls: nextAction.urls,
+        },
+      });
+    }
 
     // We execute the action and update the state of our system
     if (nextAction.type === "search" && nextAction.query) {

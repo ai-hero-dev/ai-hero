@@ -1,6 +1,8 @@
 import ReactMarkdown, { type Components } from "react-markdown";
 import type { Message } from "ai";
 import { useState } from "react";
+import { ReasoningSteps } from "./reasoning-steps";
+import type { MessageAnnotation } from "~/lib/get-next-action";
 
 // MessagePart covers all possible message content types. Hover to see all options!
 export type MessagePart = NonNullable<Message["parts"]>[number];
@@ -9,6 +11,7 @@ interface ChatMessageProps {
   parts: MessagePart[];
   role: string;
   userName: string;
+  annotations: MessageAnnotation[];
 }
 
 const components: Components = {
@@ -111,7 +114,12 @@ function CollapsibleToolResult({ toolInvocation }: { toolInvocation: any }) {
   );
 }
 
-export const ChatMessage = ({ parts, role, userName }: ChatMessageProps) => {
+export const ChatMessage = ({
+  parts,
+  role,
+  userName,
+  annotations,
+}: ChatMessageProps) => {
   const isAI = role === "assistant";
 
   return (
@@ -124,6 +132,9 @@ export const ChatMessage = ({ parts, role, userName }: ChatMessageProps) => {
         <p className="mb-2 text-sm font-semibold text-gray-400">
           {isAI ? "AI" : userName}
         </p>
+        {isAI && annotations && annotations.length > 0 && (
+          <ReasoningSteps annotations={annotations} />
+        )}
         <div className="prose prose-invert max-w-none">
           {parts.map((part, idx) => renderPart(part, idx))}
         </div>

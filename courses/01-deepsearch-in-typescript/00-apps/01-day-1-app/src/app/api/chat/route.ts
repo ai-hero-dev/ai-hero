@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import { Langfuse } from "langfuse";
 import { env } from "~/env";
 import { streamFromDeepSearch } from "./deep-search";
+import type { MessageAnnotation } from "~/lib/get-next-action";
 
 export const maxDuration = 60;
 
@@ -98,6 +99,9 @@ export async function POST(request: Request) {
         messages,
         onFinish: async ({ text }) => {
           console.log("onFinish", text);
+        },
+        writeMessageAnnotation: (annotation: MessageAnnotation) => {
+          dataStream.writeMessageAnnotation(annotation);
         },
         /*onFinish: async ({ response }) => {
           // Merge the streamed response messages with the original messages
