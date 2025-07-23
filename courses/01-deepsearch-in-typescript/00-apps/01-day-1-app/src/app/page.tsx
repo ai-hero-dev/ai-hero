@@ -35,6 +35,7 @@ async function getSidebarAndChatData({
           role: msg.role as "user" | "assistant",
           parts: msg.parts as AIMessage["parts"],
           content: "",
+          annotations: msg.annotations as AIMessage["annotations"],
         }));
       }
     }

@@ -1,4 +1,9 @@
-import type { Message, TelemetrySettings, StreamTextResult } from "ai";
+import type {
+  Message,
+  TelemetrySettings,
+  StreamTextResult,
+  streamText,
+} from "ai";
 import { checkRateLimit, recordRateLimit } from "~/server/redis/rate-limit";
 import { env } from "~/env";
 import { runAgentLoop } from "~/lib/run-agent-loop";
@@ -6,7 +11,7 @@ import type { MessageAnnotation } from "~/lib/get-next-action";
 
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
-  onFinish: (result: { text: string }) => void;
+  onFinish: Parameters<typeof streamText>[0]["onFinish"];
   langfuseTraceId?: string;
   writeMessageAnnotation?: (annotation: MessageAnnotation) => void;
 }): Promise<StreamTextResult<{}, string>> => {
@@ -39,6 +44,7 @@ export const streamFromDeepSearch = async (opts: {
   // Run the agent loop and return the result
   return runAgentLoop(opts.messages, opts.writeMessageAnnotation, {
     langfuseTraceId,
+    onFinish: opts.onFinish,
   });
 };
 

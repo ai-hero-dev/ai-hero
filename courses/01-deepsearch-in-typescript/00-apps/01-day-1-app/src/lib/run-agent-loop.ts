@@ -1,4 +1,4 @@
-import type { StreamTextResult } from "ai";
+import type { streamText, StreamTextResult } from "ai";
 import type { Message } from "ai";
 import { searchSerper } from "~/lib/serper";
 import { bulkCrawlWebsites } from "~/lib/scraper";
@@ -33,7 +33,9 @@ interface RunAgentLoopOptions {
 export const runAgentLoop = async (
   messages: Message[],
   writeMessageAnnotation?: (annotation: MessageAnnotation) => void,
-  opts?: RunAgentLoopOptions,
+  opts?: RunAgentLoopOptions & {
+    onFinish: Parameters<typeof streamText>[0]["onFinish"];
+  },
 ): Promise<StreamTextResult<{}, string>> => {
   // A persistent container for the state of our system
   const ctx = new SystemContext(messages);
@@ -85,7 +87,12 @@ export const runAgentLoop = async (
     } else if (nextAction.type === "answer") {
       const lastMessage = messages[messages.length - 1];
       const userQuestion = lastMessage?.content || "";
-      return answerQuestion(ctx, userQuestion, { isFinal: false }, opts);
+      return answerQuestion(
+        ctx,
+        userQuestion,
+        { isFinal: false, onFinish: opts?.onFinish },
+        opts,
+      );
     }
 
     // We increment the step counter
@@ -96,5 +103,10 @@ export const runAgentLoop = async (
   // we ask the LLM to give its best attempt at an answer
   const lastMessage = messages[messages.length - 1];
   const userQuestion = lastMessage?.content || "";
-  return answerQuestion(ctx, userQuestion, { isFinal: true }, opts);
+  return answerQuestion(
+    ctx,
+    userQuestion,
+    { isFinal: true, onFinish: opts?.onFinish },
+    opts,
+  );
 };

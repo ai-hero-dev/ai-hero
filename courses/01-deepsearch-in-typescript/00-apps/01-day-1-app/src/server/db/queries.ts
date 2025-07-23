@@ -39,12 +39,14 @@ export const upsertChat = async (opts: {
 
   // Insert new messages
   if (opts.messages.length > 0) {
+    console.log("upserting messages", opts.messages);
     await db.insert(messages).values(
       opts.messages.map((m, i) => ({
         id: nanoid(),
         chatId: opts.chatId,
         role: m.role,
         parts: m.parts,
+        annotations: m.annotations,
         order: i,
       })),
     );

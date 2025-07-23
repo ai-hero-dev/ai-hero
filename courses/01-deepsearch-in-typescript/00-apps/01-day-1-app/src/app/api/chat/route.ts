@@ -8,6 +8,8 @@ import { env } from "~/env";
 import { streamFromDeepSearch } from "./deep-search";
 import type { MessageAnnotation } from "~/lib/get-next-action";
 
+type OurMessageAnnotation = MessageAnnotation;
+
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
@@ -95,45 +97,43 @@ export async function POST(request: Request) {
           chatId,
         });
       }
+
+      // Collect annotations in memory
+      const annotations: OurMessageAnnotation[] = [];
+
+      const writeMessageAnnotation = (annotation: OurMessageAnnotation) => {
+        // Save the annotation in-memory
+        annotations.push(annotation);
+        // Send it to the client
+        dataStream.writeMessageAnnotation(annotation);
+      };
+
       const result = await streamFromDeepSearch({
         messages,
-        onFinish: async ({ text }) => {
-          console.log("onFinish", text);
-        },
-        writeMessageAnnotation: (annotation: MessageAnnotation) => {
-          dataStream.writeMessageAnnotation(annotation);
-        },
-        /*onFinish: async ({ response }) => {
-          // Merge the streamed response messages with the original messages
+        onFinish: async ({ response }) => {
+          // Get the last message
           const updatedMessages = appendResponseMessages({
             messages,
             responseMessages: response.messages,
           });
 
-          // --- DB CALL: upsertChat (final) ---
-          const upsertChatFinalSpan = trace.span({
-            name: "db-upsert-chat-final",
-            input: {
-              userId,
-              chatId: chatId!,
-              title: updatedMessages.at(-1)?.content.slice(0, 10) ?? "New Chat",
-              messages: updatedMessages,
-            },
-          });
-          try {
-            await upsertChat({
-              userId,
-              chatId: chatId!,
-              title: updatedMessages.at(-1)?.content.slice(0, 10) ?? "New Chat",
-              messages: updatedMessages,
-            });
-            upsertChatFinalSpan.end({ output: { success: true } });
-          } catch (error) {
-            upsertChatFinalSpan.end({ output: { error: String(error) } });
-            throw error;
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+          if (!lastMessage) {
+            return;
           }
-          await langfuse.flushAsync();
-        },*/
+
+          // Add the annotations to the last message
+          lastMessage.annotations = annotations;
+
+          // Upsert the chat and its messages
+          await upsertChat({
+            userId,
+            chatId: chatId!,
+            title: messages.at(-1)?.content.slice(0, 10) ?? "New Chat",
+            messages: updatedMessages,
+          });
+        },
+        writeMessageAnnotation,
         langfuseTraceId: trace.id,
       });
 

@@ -11,10 +11,13 @@ interface AnswerQuestionOptions {
 export const answerQuestion = async (
   context: SystemContext,
   userQuestion: string,
-  options?: { isFinal?: boolean },
+  options?: {
+    isFinal?: boolean;
+    onFinish?: Parameters<typeof streamText>[0]["onFinish"];
+  },
   opts?: AnswerQuestionOptions,
 ): Promise<StreamTextResult<{}, string>> => {
-  const { isFinal = false } = options || {};
+  const { isFinal = false, onFinish } = options || {};
 
   const systemPrompt = `You are a helpful assistant that answers questions based on web search results and scraped content.
 
@@ -60,6 +63,7 @@ Please provide a comprehensive answer to the user's question based on the availa
           },
         }
       : undefined,
+    onFinish,
   });
 };
 
