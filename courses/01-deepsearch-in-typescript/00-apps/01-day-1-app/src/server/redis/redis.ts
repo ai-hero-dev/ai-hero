@@ -3,7 +3,7 @@ import Redis from "ioredis";
 
 export const redis = new Redis(env.REDIS_URL);
 
-const CACHE_EXPIRY_SECONDS = 60 * 60 * 6; // 6 hours
+const CACHE_EXPIRY_SECONDS = env.CACHE_EXPIRY_SECONDS;
 const CACHE_KEY_SEPARATOR = ":";
 
 export const cacheWithRedis = <TFunc extends (...args: any[]) => Promise<any>>(
