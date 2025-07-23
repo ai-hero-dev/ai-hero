@@ -7,7 +7,7 @@ import type { MessageAnnotation } from "~/lib/get-next-action";
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
   onFinish: (result: { text: string }) => void;
-  telemetry: TelemetrySettings;
+  langfuseTraceId?: string;
   writeMessageAnnotation?: (annotation: MessageAnnotation) => void;
 }): Promise<StreamTextResult<{}, string>> => {
   // Global rate limiting configuration
@@ -33,20 +33,19 @@ export const streamFromDeepSearch = async (opts: {
   // Record the request
   await recordRateLimit(config);
 
-  // Get the user's question from the last message
-  const userQuestion = opts.messages[opts.messages.length - 1]?.content || "";
+  // Extract the langfuseTraceId from telemetry metadata
+  const langfuseTraceId = opts.langfuseTraceId;
 
   // Run the agent loop and return the result
-  return runAgentLoop(userQuestion, opts.writeMessageAnnotation);
+  return runAgentLoop(opts.messages, opts.writeMessageAnnotation, {
+    langfuseTraceId,
+  });
 };
 
 export async function askDeepSearch(messages: Message[]) {
   const result = await streamFromDeepSearch({
     messages,
     onFinish: () => {},
-    telemetry: {
-      isEnabled: false,
-    },
   });
 
   // Consume the stream - without this, the stream will never finish

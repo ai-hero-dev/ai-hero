@@ -1,3 +1,5 @@
+import type { Message } from "ai";
+
 type QueryResultSearchResult = {
   date: string;
   title: string;
@@ -25,9 +27,9 @@ export class SystemContext {
   private step = 0;
 
   /**
-   * The user's original question
+   * The full conversation messages
    */
-  private userQuestion: string;
+  public messages: Message[];
 
   /**
    * The history of all queries searched
@@ -39,8 +41,8 @@ export class SystemContext {
    */
   private scrapeHistory: ScrapeResult[] = [];
 
-  constructor(userQuestion: string) {
-    this.userQuestion = userQuestion;
+  constructor(messages: Message[]) {
+    this.messages = messages;
   }
 
   shouldStop() {
@@ -51,8 +53,11 @@ export class SystemContext {
     this.step++;
   }
 
-  getUserQuestion(): string {
-    return this.userQuestion;
+  getMessages(): string {
+    const formattedMessages = this.messages
+      .map((msg) => `<${msg.role}>${msg.content}</${msg.role}>`)
+      .join("\n");
+    return formattedMessages;
   }
 
   reportQueries(queries: QueryResult[]) {

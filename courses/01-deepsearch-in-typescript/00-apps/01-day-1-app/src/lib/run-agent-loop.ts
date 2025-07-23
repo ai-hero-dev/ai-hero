@@ -1,4 +1,5 @@
 import type { StreamTextResult } from "ai";
+import type { Message } from "ai";
 import { searchSerper } from "~/lib/serper";
 import { bulkCrawlWebsites } from "~/lib/scraper";
 import { env } from "~/env";
@@ -25,18 +26,23 @@ const scrapePages = async (urls: string[]) => {
   return bulkCrawlWebsites({ urls });
 };
 
+interface RunAgentLoopOptions {
+  langfuseTraceId?: string;
+}
+
 export const runAgentLoop = async (
-  userQuestion: string,
+  messages: Message[],
   writeMessageAnnotation?: (annotation: MessageAnnotation) => void,
+  opts?: RunAgentLoopOptions,
 ): Promise<StreamTextResult<{}, string>> => {
   // A persistent container for the state of our system
-  const ctx = new SystemContext(userQuestion);
+  const ctx = new SystemContext(messages);
 
   // A loop that continues until we have an answer
   // or we've taken 10 actions
   while (!ctx.shouldStop()) {
     // We choose the next action based on the state of our system
-    const nextAction = await getNextAction(ctx);
+    const nextAction = await getNextAction(ctx, opts);
 
     // Send annotation about the chosen action
     if (writeMessageAnnotation) {
@@ -77,7 +83,9 @@ export const runAgentLoop = async (
         );
       }
     } else if (nextAction.type === "answer") {
-      return answerQuestion(ctx, userQuestion);
+      const lastMessage = messages[messages.length - 1];
+      const userQuestion = lastMessage?.content || "";
+      return answerQuestion(ctx, userQuestion, { isFinal: false }, opts);
     }
 
     // We increment the step counter
@@ -86,5 +94,7 @@ export const runAgentLoop = async (
 
   // If we've taken 10 actions and still don't have an answer,
   // we ask the LLM to give its best attempt at an answer
-  return answerQuestion(ctx, userQuestion, { isFinal: true });
+  const lastMessage = messages[messages.length - 1];
+  const userQuestion = lastMessage?.content || "";
+  return answerQuestion(ctx, userQuestion, { isFinal: true }, opts);
 };

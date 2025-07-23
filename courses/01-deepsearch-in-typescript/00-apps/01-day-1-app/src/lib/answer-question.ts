@@ -4,10 +4,15 @@ import { model } from "~/app/api/chat/model";
 import type { SystemContext } from "./system-context";
 import { markdownJoinerTransform } from "./markdown-joiner";
 
+interface AnswerQuestionOptions {
+  langfuseTraceId?: string;
+}
+
 export const answerQuestion = async (
   context: SystemContext,
   userQuestion: string,
   options?: { isFinal?: boolean },
+  opts?: AnswerQuestionOptions,
 ): Promise<StreamTextResult<{}, string>> => {
   const { isFinal = false } = options || {};
 
@@ -26,7 +31,8 @@ ${isFinal ? "Note: You may not have complete information to answer the question 
     model,
     system: systemPrompt,
     prompt: `
-User Question: "${userQuestion}"
+    Message history:
+${context.getMessages()}
 
 Available Information:
 
@@ -45,6 +51,15 @@ Please provide a comprehensive answer to the user's question based on the availa
       }),
       markdownJoinerTransform(),
     ],
+    experimental_telemetry: opts?.langfuseTraceId
+      ? {
+          isEnabled: true,
+          functionId: "answer-question",
+          metadata: {
+            langfuseTraceId: opts.langfuseTraceId,
+          },
+        }
+      : undefined,
   });
 };
 

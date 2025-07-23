@@ -134,13 +134,7 @@ export async function POST(request: Request) {
           }
           await langfuse.flushAsync();
         },*/
-        telemetry: {
-          isEnabled: true,
-          functionId: `agent`,
-          metadata: {
-            langfuseTraceId: trace.id,
-          },
-        },
+        langfuseTraceId: trace.id,
       });
 
       result.mergeIntoDataStream(dataStream);

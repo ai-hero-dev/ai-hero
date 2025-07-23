@@ -48,7 +48,14 @@ export const actionSchema = z.object({
     .optional(),
 });
 
-export const getNextAction = async (context: SystemContext) => {
+interface GetNextActionOptions {
+  langfuseTraceId?: string;
+}
+
+export const getNextAction = async (
+  context: SystemContext,
+  opts?: GetNextActionOptions,
+) => {
   const result = await generateObject({
     model,
     schema: actionSchema,
@@ -58,7 +65,8 @@ You are a helpful assistant that can search the web, scrape a URL, or answer the
 Your role is to choose the next action based on the available context.
 `,
     prompt: `
-The user's question is: "${context.getUserQuestion()}"
+    Message history:
+${context.getMessages()}
 
 Based on the context, choose the next action:
 
@@ -72,6 +80,15 @@ ${context.getQueryHistory()}
 
 ${context.getScrapeHistory()}
     `,
+    experimental_telemetry: opts?.langfuseTraceId
+      ? {
+          isEnabled: true,
+          functionId: "get-next-action",
+          metadata: {
+            langfuseTraceId: opts.langfuseTraceId,
+          },
+        }
+      : undefined,
   });
 
   return result.object;
