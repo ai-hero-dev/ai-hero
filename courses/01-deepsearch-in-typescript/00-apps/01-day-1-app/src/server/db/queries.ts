@@ -4,11 +4,13 @@ import { eq, and, gte, lt } from "drizzle-orm";
 import type { Message as AIMessage } from "ai";
 import { nanoid } from "nanoid";
 import { env } from "~/env";
+import { generateText } from "ai";
+import { model } from "~/app/api/chat/model";
 
 export const upsertChat = async (opts: {
   userId: string;
   chatId: string;
-  title: string;
+  title?: string;
   messages: AIMessage[];
 }) => {
   // Check if chat exists
@@ -25,14 +27,22 @@ export const upsertChat = async (opts: {
     await db.insert(chats).values({
       id: opts.chatId,
       userId: opts.userId,
-      title: opts.title,
+      title: opts.title ?? "New Chat",
     });
   } else {
-    // Update title and updatedAt
-    await db
-      .update(chats)
-      .set({ title: opts.title, updatedAt: new Date() })
-      .where(eq(chats.id, opts.chatId));
+    // Update title and updatedAt only if title is provided
+    if (opts.title !== undefined) {
+      await db
+        .update(chats)
+        .set({ title: opts.title, updatedAt: new Date() })
+        .where(eq(chats.id, opts.chatId));
+    } else {
+      // Only update updatedAt if no title is provided
+      await db
+        .update(chats)
+        .set({ updatedAt: new Date() })
+        .where(eq(chats.id, opts.chatId));
+    }
     // Delete existing messages
     await db.delete(messages).where(eq(messages.chatId, opts.chatId));
   }
@@ -76,6 +86,24 @@ export const getChats = async (opts: { userId: string }) => {
     },
     orderBy: (chats, { desc }) => [desc(chats.updatedAt)],
   });
+};
+
+export const generateChatTitle = async (messages: AIMessage[]) => {
+  const { text } = await generateText({
+    model,
+    system: `You are a chat title generator.
+      You will be given a chat history, and you will need to generate a title for the chat.
+      The title should be a single sentence that captures the essence of the chat.
+      The title should be no more than 50 characters.
+      The title should be in the same language as the chat history.
+      `,
+    prompt: `Here is the chat history:
+
+      ${messages.map((m) => m.content).join("\n")}
+    `,
+  });
+
+  return text;
 };
 
 const DAILY_LIMIT = env.DB_DAILY_LIMIT;

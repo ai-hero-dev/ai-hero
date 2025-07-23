@@ -1,7 +1,11 @@
 import type { Message } from "ai";
 import { createDataStreamResponse, appendResponseMessages } from "ai";
 import { auth } from "~/server/auth/index.ts";
-import { checkRateLimit, upsertChat } from "~/server/db/queries";
+import {
+  checkRateLimit,
+  upsertChat,
+  generateChatTitle,
+} from "~/server/db/queries";
 import { nanoid } from "nanoid";
 import { Langfuse } from "langfuse";
 import { env } from "~/env";
@@ -64,23 +68,21 @@ export async function POST(request: Request) {
     });
   }
 
-  // --- DB CALL: upsertChat (initial) ---
+  const titleToBe = startGeneratingTitle(isNewChat, messages);
+
+  const newChat = {
+    userId,
+    chatId,
+    title: "Generating...",
+    messages,
+  };
+
   const upsertChatInitialSpan = trace.span({
     name: "db-upsert-chat-initial",
-    input: {
-      userId,
-      chatId,
-      title: messages.at(-1)?.content.slice(0, 10) ?? "New chat",
-      messages,
-    },
+    input: newChat,
   });
   try {
-    await upsertChat({
-      userId,
-      chatId,
-      title: messages.at(-1)?.content.slice(0, 10) ?? "New chat",
-      messages,
-    });
+    await upsertChat(newChat);
     upsertChatInitialSpan.end({ output: { success: true } });
   } catch (error) {
     upsertChatInitialSpan.end({ output: { error: String(error) } });
@@ -125,12 +127,15 @@ export async function POST(request: Request) {
           // Add the annotations to the last message
           lastMessage.annotations = annotations;
 
-          // Upsert the chat and its messages
+          // Resolve the title promise
+          const title = await titleToBe;
+
+          // Upsert the chat and its messages with the generated title if available
           await upsertChat({
             userId,
             chatId: chatId!,
-            title: messages.at(-1)?.content.slice(0, 10) ?? "New Chat",
             messages: updatedMessages,
+            title, // Only save the title if it's not empty
           });
         },
         writeMessageAnnotation,
@@ -145,3 +150,10 @@ export async function POST(request: Request) {
     },
   });
 }
+
+const startGeneratingTitle = (isNewChat: boolean, messages: Message[]) => {
+  if (isNewChat) {
+    return generateChatTitle(messages);
+  }
+  return Promise.resolve("");
+};
