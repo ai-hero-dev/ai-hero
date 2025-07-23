@@ -1,4 +1,5 @@
 import type { Message } from "ai";
+import type { LocationInfo } from "./location-utils";
 
 type QueryResultSearchResult = {
   date: string;
@@ -41,8 +42,14 @@ export class SystemContext {
    */
   private scrapeHistory: ScrapeResult[] = [];
 
-  constructor(messages: Message[]) {
+  /**
+   * User's location information
+   */
+  private locationInfo?: LocationInfo;
+
+  constructor(messages: Message[], locationInfo?: LocationInfo) {
     this.messages = messages;
+    this.locationInfo = locationInfo;
   }
 
   shouldStop() {
@@ -58,6 +65,19 @@ export class SystemContext {
       .map((msg) => `<${msg.role}>${msg.content}</${msg.role}>`)
       .join("\n");
     return formattedMessages;
+  }
+
+  getLocationContext(): string {
+    if (!this.locationInfo) {
+      return "";
+    }
+
+    return `About the origin of user's request:
+- lat: ${this.locationInfo.latitude || "unknown"}
+- lon: ${this.locationInfo.longitude || "unknown"}
+- city: ${this.locationInfo.city || "unknown"}
+- country: ${this.locationInfo.country || "unknown"}
+`;
   }
 
   reportQueries(queries: QueryResult[]) {

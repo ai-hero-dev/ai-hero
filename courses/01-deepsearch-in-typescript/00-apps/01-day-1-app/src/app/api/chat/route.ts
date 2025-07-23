@@ -11,6 +11,7 @@ import { Langfuse } from "langfuse";
 import { env } from "~/env";
 import { streamFromDeepSearch } from "./deep-search";
 import type { MessageAnnotation } from "~/lib/get-next-action";
+import { getUserLocation } from "~/lib/location-utils";
 
 type OurMessageAnnotation = MessageAnnotation;
 
@@ -41,6 +42,9 @@ export async function POST(request: Request) {
   if (typeof isNewChat !== "boolean") {
     isNewChat = !body.chatId;
   }
+
+  // Get user location
+  const locationInfo = await getUserLocation(request);
 
   // Create the trace after chatId is set
   const trace = langfuse.trace({
@@ -112,6 +116,7 @@ export async function POST(request: Request) {
 
       const result = await streamFromDeepSearch({
         messages,
+        locationInfo,
         onFinish: async ({ response }) => {
           // Get the last message
           const updatedMessages = appendResponseMessages({

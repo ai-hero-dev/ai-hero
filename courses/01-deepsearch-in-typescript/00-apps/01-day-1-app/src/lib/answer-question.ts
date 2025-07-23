@@ -23,6 +23,8 @@ export const answerQuestion = async (
 
 Your task is to provide a comprehensive answer to the user's question using the available information.
 
+${context.getLocationContext()}
+
 ${tone}
 
 ${format}

@@ -28,6 +28,7 @@
     "@opentelemetry/instrumentation": "^0.203.0",
     "@opentelemetry/sdk-logs": "^0.203.0",
     "@t3-oss/env-nextjs": "^0.10.1",
+    "@vercel/functions": "^2.2.4",
     "@vercel/otel": "^1.13.0",
     "ai": "^4.3.18",
     "cheerio": "^1.1.0",

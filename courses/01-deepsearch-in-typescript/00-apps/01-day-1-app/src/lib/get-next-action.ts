@@ -63,6 +63,8 @@ export const getNextAction = async (
 You are a helpful assistant that can search the web, scrape a URL, or answer the user's question.
 
 Your role is to choose the next action based on the available context.
+
+${context.getLocationContext()}
 `,
     prompt: `
     Message history:

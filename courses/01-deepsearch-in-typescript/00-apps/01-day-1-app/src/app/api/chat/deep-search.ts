@@ -8,12 +8,14 @@ import { checkRateLimit, recordRateLimit } from "~/server/redis/rate-limit";
 import { env } from "~/env";
 import { runAgentLoop } from "~/lib/run-agent-loop";
 import type { MessageAnnotation } from "~/lib/get-next-action";
+import type { LocationInfo } from "~/lib/location-utils";
 
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
   onFinish: Parameters<typeof streamText>[0]["onFinish"];
   langfuseTraceId?: string;
   writeMessageAnnotation?: (annotation: MessageAnnotation) => void;
+  locationInfo?: LocationInfo;
 }): Promise<StreamTextResult<{}, string>> => {
   // Global rate limiting configuration
   const config = {
@@ -44,13 +46,18 @@ export const streamFromDeepSearch = async (opts: {
   // Run the agent loop and return the result
   return runAgentLoop(opts.messages, opts.writeMessageAnnotation, {
     langfuseTraceId,
+    locationInfo: opts.locationInfo,
     onFinish: opts.onFinish,
   });
 };
 
-export async function askDeepSearch(messages: Message[]) {
+export async function askDeepSearch(
+  messages: Message[],
+  locationInfo?: LocationInfo,
+) {
   const result = await streamFromDeepSearch({
     messages,
+    locationInfo,
     onFinish: () => {},
   });
 

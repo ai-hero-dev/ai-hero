@@ -6,6 +6,7 @@ import { env } from "~/env";
 import { SystemContext } from "./system-context";
 import { getNextAction, type MessageAnnotation } from "./get-next-action";
 import { answerQuestion } from "./answer-question";
+import type { LocationInfo } from "./location-utils";
 
 // Copy of the search function from tools.ts
 const searchWeb = async (query: string) => {
@@ -28,6 +29,7 @@ const scrapePages = async (urls: string[]) => {
 
 interface RunAgentLoopOptions {
   langfuseTraceId?: string;
+  locationInfo?: LocationInfo;
 }
 
 export const runAgentLoop = async (
@@ -38,7 +40,7 @@ export const runAgentLoop = async (
   },
 ): Promise<StreamTextResult<{}, string>> => {
   // A persistent container for the state of our system
-  const ctx = new SystemContext(messages);
+  const ctx = new SystemContext(messages, opts?.locationInfo);
 
   // A loop that continues until we have an answer
   // or we've taken 10 actions
