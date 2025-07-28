@@ -1,9 +1,14 @@
 import type { Message } from "ai";
-import { streamText, createDataStreamResponse } from "ai";
+import {
+  appendResponseMessages,
+  createDataStreamResponse,
+  streamText,
+} from "ai";
 import { z } from "zod";
 import { auth } from "../../../server/auth";
 import { model } from "../../../model";
 import { searchSerper } from "../../../serper";
+import { upsertChat, getChat } from "../../../server/db/queries";
 
 export const maxDuration = 60;
 
@@ -16,12 +21,43 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as {
     messages: Array<Message>;
+    chatId?: string;
   };
+
+  const { messages, chatId } = body;
+  const userId = session.user.id;
+
+  if (!messages?.length) {
+    return new Response("No messages provided", { status: 400 });
+  }
+
+  // Generate a chat ID if none provided
+  const finalChatId = chatId ?? crypto.randomUUID();
+
+  // If chatId is provided, verify it belongs to the current user
+  if (chatId) {
+    const existingChat = await getChat({ userId, chatId });
+    if (!existingChat) {
+      return new Response("Chat not found or access denied", { status: 404 });
+    }
+  }
+
+  // Create a title from the first user message
+  const firstUserMessage = messages.find((msg) => msg.role === "user");
+  const title = firstUserMessage?.content?.slice(0, 100) || "New Chat";
+
+  // Create the chat before starting the stream to avoid issues with long-running streams
+  if (!chatId) {
+    await upsertChat({
+      userId,
+      chatId: finalChatId,
+      title,
+      messages,
+    });
+  }
 
   return createDataStreamResponse({
     execute: async (dataStream) => {
-      const { messages } = body;
-
       const result = streamText({
         model,
         messages,
@@ -58,6 +94,22 @@ Be conversational and helpful, but always back up your claims with sources when 
               }));
             },
           },
+        },
+        onFinish: async ({ text, finishReason, usage, response }) => {
+          const responseMessages = response.messages;
+
+          const updatedMessages = appendResponseMessages({
+            messages,
+            responseMessages,
+          });
+
+          // Save the complete message history to the database
+          await upsertChat({
+            userId,
+            chatId: finalChatId,
+            title,
+            messages: updatedMessages,
+          });
         },
       });
 

@@ -47,7 +47,7 @@ export const upsertChat = async (opts: {
     const messageValues = chatMessages.map((message, index) => ({
       chatId,
       role: message.role,
-      parts: message.content,
+      parts: message.parts,
       order: index,
     }));
 
@@ -75,7 +75,8 @@ export const getChat = async (opts: { userId: string; chatId: string }) => {
     return null;
   }
 
-  const chat = chatWithMessages[0].chat;
+  const chat = chatWithMessages[0]?.chat;
+
   const dbMessages = chatWithMessages
     .filter((row) => row.message !== null)
     .map((row) => row.message!);
