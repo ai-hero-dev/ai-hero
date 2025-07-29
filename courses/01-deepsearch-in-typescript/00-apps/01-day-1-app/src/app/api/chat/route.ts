@@ -70,6 +70,7 @@ export async function POST(request: Request) {
         model,
         messages,
         maxSteps: 10,
+        experimental_telemetry: { isEnabled: true },
         system: `You are a helpful AI assistant that can search the web for current information. 
 
 When users ask questions that might benefit from current information, you should use the searchWeb tool to find relevant and up-to-date information.
