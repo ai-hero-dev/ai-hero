@@ -85,7 +85,7 @@ export default async function HomePage({
       </div>
 
       <ChatPage
-        key={chatId}
+        key={chatId ? `chat-${chatId}` : "new-chat"}
         chatId={chatId}
         isAuthenticated={isAuthenticated}
         userName={userName}

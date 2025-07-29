@@ -5,10 +5,16 @@ import {
   streamText,
 } from "ai";
 import { z } from "zod";
+import { Langfuse } from "langfuse";
+import { env } from "~/env";
 import { auth } from "../../../server/auth";
 import { model } from "../../../model";
 import { searchSerper } from "../../../serper";
 import { upsertChat, getChat } from "../../../server/db/queries";
+
+const langfuse = new Langfuse({
+  environment: env.NODE_ENV,
+});
 
 export const maxDuration = 60;
 
@@ -56,6 +62,13 @@ export async function POST(request: Request) {
     });
   }
 
+  // Create Langfuse trace with user and session tracking
+  const trace = langfuse.trace({
+    sessionId: finalChatId,
+    name: "chat",
+    userId: session.user.id,
+  });
+
   return createDataStreamResponse({
     execute: async (dataStream) => {
       // If this is a new chat, send the chat ID to the frontend
@@ -70,7 +83,13 @@ export async function POST(request: Request) {
         model,
         messages,
         maxSteps: 10,
-        experimental_telemetry: { isEnabled: true },
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: `agent`,
+          metadata: {
+            langfuseTraceId: trace.id,
+          },
+        },
         system: `You are a helpful AI assistant that can search the web for current information. 
 
 When users ask questions that might benefit from current information, you should use the searchWeb tool to find relevant and up-to-date information.
@@ -119,6 +138,9 @@ Be conversational and helpful, but always back up your claims with sources when 
             title,
             messages: updatedMessages,
           });
+
+          // Flush the trace to Langfuse
+          await langfuse.flushAsync();
         },
       });
 

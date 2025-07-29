@@ -37,6 +37,7 @@ export const ChatPage = ({
     initialMessages,
   });
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [pendingChatId, setPendingChatId] = useState<string | null>(null);
   const router = useRouter();
 
   // Log our messages
@@ -47,9 +48,18 @@ export const ChatPage = ({
     const lastDataItem = data?.[data.length - 1];
 
     if (lastDataItem && isNewChatCreated(lastDataItem)) {
-      router.push(`?id=${lastDataItem.chatId}`);
+      // Store the new chat ID but don't redirect immediately
+      setPendingChatId(lastDataItem.chatId);
     }
-  }, [data, router]);
+  }, [data]);
+
+  // Redirect only after streaming is complete and we have a pending chat ID
+  useEffect(() => {
+    if (pendingChatId && !isLoading) {
+      router.push(`?id=${pendingChatId}`);
+      setPendingChatId(null);
+    }
+  }, [pendingChatId, isLoading, router]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
