@@ -85,7 +85,8 @@ export const getChat = async (opts: { userId: string; chatId: string }) => {
   const aiMessages: Message[] = dbMessages.map((msg) => ({
     id: msg.id,
     role: msg.role as "user" | "assistant" | "system",
-    content: msg.parts as string,
+    parts: msg.parts as Message["parts"],
+    content: "",
   }));
 
   return {
