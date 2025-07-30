@@ -11,6 +11,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "dev": "next dev --turbo",
+    "evals": "evalite watch",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
