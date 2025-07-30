@@ -10,6 +10,8 @@ import { env } from "~/env";
 import { auth } from "../../../server/auth";
 import { model } from "../../../model";
 import { searchSerper } from "../../../serper";
+import { bulkCrawlWebsites } from "../../../scraper";
+import { cacheWithRedis } from "../../../server/redis/redis";
 import { upsertChat, getChat } from "../../../server/db/queries";
 
 const langfuse = new Langfuse({
@@ -90,9 +92,25 @@ export async function POST(request: Request) {
             langfuseTraceId: trace.id,
           },
         },
-        system: `You are a helpful AI assistant that can search the web for current information. 
+        system: `You are a helpful AI assistant that follows a specific workflow to provide accurate, detailed answers:
 
-When users ask questions that might benefit from current information, you should use the searchWeb tool to find relevant and up-to-date information.
+WORKFLOW:
+1. Use searchWeb to find relevant URLs that contain information related to the user's question
+2. Use scrapePages to get the full content of 4-6 diverse URLs from different sources
+3. Use the full content to provide detailed, accurate answers with proper citations
+
+When users ask questions that require current or detailed information, follow this workflow:
+- First, search for relevant web pages using searchWeb
+- Then, scrape the full content of 4-6 diverse URLs from different sources using scrapePages
+- Finally, provide comprehensive answers based on the full content you've gathered
+
+IMPORTANT GUIDELINES:
+- Always scrape 4-6 URLs per query to ensure comprehensive coverage
+- Prioritize diverse sources - avoid scraping multiple pages from the same domain
+- Look for authoritative sources, news sites, academic sources, and different perspectives
+- When scraping, select URLs that appear to be from different websites/organizations
+
+This approach ensures you have complete information from multiple perspectives rather than just snippets, leading to more accurate and detailed responses.
 
 IMPORTANT: Always format ALL links as Markdown links using the [text](url) format. This includes:
 - Links from web search results
@@ -100,8 +118,6 @@ IMPORTANT: Always format ALL links as Markdown links using the [text](url) forma
 - Links to sources, articles, or websites
 
 Never use plain URLs or HTML links. Always use the Markdown format: [descriptive text](url)
-
-If a user asks about current events, recent developments, or anything that might have changed recently, use the search tool to get the latest information.
 
 Be conversational and helpful, but always back up your claims with sources when using web search results.`,
         tools: {
@@ -111,7 +127,7 @@ Be conversational and helpful, but always back up your claims with sources when 
             }),
             execute: async ({ query }, { abortSignal }) => {
               const results = await searchSerper(
-                { q: query, num: 10 },
+                { q: query, num: 15 },
                 abortSignal,
               );
 
@@ -121,6 +137,43 @@ Be conversational and helpful, but always back up your claims with sources when 
                 snippet: result.snippet,
               }));
             },
+          },
+          scrapePages: {
+            parameters: z.object({
+              urls: z
+                .array(z.string())
+                .describe(
+                  "Array of URLs to scrape and extract full content from",
+                ),
+            }),
+            execute: cacheWithRedis(
+              "scrapePages",
+              async (
+                { urls }: { urls: string[] },
+                { abortSignal }: { abortSignal?: AbortSignal },
+              ) => {
+                const result = await bulkCrawlWebsites({ urls });
+
+                if (!result.success) {
+                  return {
+                    error: result.error,
+                    results: result.results.map((r) => ({
+                      url: r.url,
+                      success: r.result.success,
+                      data: r.result.success ? r.result.data : r.result.error,
+                    })),
+                  };
+                }
+
+                return {
+                  results: result.results.map((r) => ({
+                    url: r.url,
+                    success: r.result.success,
+                    data: r.result.data,
+                  })),
+                };
+              },
+            ),
           },
         },
         onFinish: async ({ text, finishReason, usage, response }) => {
