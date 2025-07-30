@@ -42,9 +42,31 @@ export async function POST(request: Request) {
   // Generate a chat ID if none provided
   const finalChatId = chatId ?? crypto.randomUUID();
 
+  // Create Langfuse trace with user and session tracking
+  const trace = langfuse.trace({
+    name: "chat",
+    userId: session.user.id,
+  });
+
   // If chatId is provided, verify it belongs to the current user
   if (chatId) {
+    const verifyChatSpan = trace.span({
+      name: "verify-chat-ownership",
+      input: {
+        userId,
+        chatId,
+      },
+    });
+
     const existingChat = await getChat({ userId, chatId });
+
+    verifyChatSpan.end({
+      output: {
+        chatFound: !!existingChat,
+        chatId,
+      },
+    });
+
     if (!existingChat) {
       return new Response("Chat not found or access denied", { status: 404 });
     }
@@ -56,19 +78,35 @@ export async function POST(request: Request) {
 
   // Create the chat before starting the stream to avoid issues with long-running streams
   if (!chatId) {
+    const createChatSpan = trace.span({
+      name: "create-new-chat",
+      input: {
+        userId,
+        chatId: finalChatId,
+        title,
+        messageCount: messages.length,
+      },
+    });
+
     await upsertChat({
       userId,
       chatId: finalChatId,
       title,
       messages,
     });
+
+    createChatSpan.end({
+      output: {
+        chatId: finalChatId,
+        title,
+        messageCount: messages.length,
+      },
+    });
   }
 
-  // Create Langfuse trace with user and session tracking
-  const trace = langfuse.trace({
+  // Update trace with sessionId now that we have the final chat ID
+  trace.update({
     sessionId: finalChatId,
-    name: "chat",
-    userId: session.user.id,
   });
 
   return createDataStreamResponse({
@@ -198,11 +236,32 @@ When discussing current events or time-sensitive information, you can reference 
           });
 
           // Save the complete message history to the database
+          const saveMessagesSpan = trace.span({
+            name: "save-complete-message-history",
+            input: {
+              userId,
+              chatId: finalChatId,
+              title,
+              originalMessageCount: messages.length,
+              responseMessageCount: responseMessages.length,
+              totalMessageCount: updatedMessages.length,
+            },
+          });
+
           await upsertChat({
             userId,
             chatId: finalChatId,
             title,
             messages: updatedMessages,
+          });
+
+          saveMessagesSpan.end({
+            output: {
+              chatId: finalChatId,
+              totalMessageCount: updatedMessages.length,
+              finishReason,
+              usage,
+            },
           });
 
           // Flush the trace to Langfuse
