@@ -5,6 +5,7 @@ import { env } from "~/env";
 import { auth } from "../../../server/auth";
 import { streamFromDeepSearch } from "../../../deep-search";
 import { upsertChat, getChat } from "../../../server/db/queries";
+import { checkRateLimit, recordRateLimit } from "../../../server/rate-limit";
 
 const langfuse = new Langfuse({
   environment: env.NODE_ENV,
@@ -18,6 +19,31 @@ export async function POST(request: Request) {
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
+
+  // Rate limiting configuration for testing
+  const rateLimitConfig = {
+    maxRequests: 10,
+    maxRetries: 3,
+    windowMs: 60_000, // 1 minute
+    keyPrefix: "chat",
+  };
+
+  // Check the rate limit
+  const rateLimitCheck = await checkRateLimit(rateLimitConfig);
+
+  if (!rateLimitCheck.allowed) {
+    console.log("Rate limit exceeded, waiting...");
+    const isAllowed = await rateLimitCheck.retry();
+    // If the rate limit is still exceeded, return a 429
+    if (!isAllowed) {
+      return new Response("Rate limit exceeded", {
+        status: 429,
+      });
+    }
+  }
+
+  // Record the request
+  await recordRateLimit(rateLimitConfig);
 
   const body = (await request.json()) as {
     messages: Array<Message>;
@@ -66,7 +92,7 @@ export async function POST(request: Request) {
 
   // Create a title from the first user message
   const firstUserMessage = messages.find((msg) => msg.role === "user");
-  const title = firstUserMessage?.content?.slice(0, 100) || "New Chat";
+  const title = firstUserMessage?.content?.slice(0, 100) ?? "New Chat";
 
   // Create the chat before starting the stream to avoid issues with long-running streams
   if (!chatId) {
