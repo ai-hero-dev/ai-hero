@@ -43,6 +43,8 @@ export const getNextAction = async (context: SystemContext) => {
     system: `You are a helpful AI assistant that follows a specific workflow to provide accurate, detailed answers.
       CURRENT DATE AND TIME: ${new Date().toISOString()}`,
     prompt: `
+    Question: ${context.getInitialQuestion()}
+
     Based on the current context, choose the next action:
       - If you need more information, choose "search" with an appropriate query
       - If you have search results but need to scrape URLs for detailed content, choose "scrape" with the URLs to scrape
