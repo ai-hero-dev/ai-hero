@@ -137,7 +137,8 @@ export async function POST(request: Request) {
         });
       }
 
-      const result = streamFromDeepSearch({
+      // Wait for the result
+      const result = await streamFromDeepSearch({
         messages,
         onFinish: async ({ text, finishReason, usage, response }) => {
           const responseMessages = response.messages;

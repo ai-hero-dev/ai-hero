@@ -64,7 +64,9 @@ const scrapeUrl = async (
   return scrapeResults;
 };
 
-export async function runAgentLoop(initialQuestion: string): Promise<string> {
+export async function runAgentLoop(
+  initialQuestion: string,
+): Promise<StreamTextResult<{}, string>> {
   const ctx = new SystemContext(initialQuestion);
 
   // A loop that continues until we have an answer

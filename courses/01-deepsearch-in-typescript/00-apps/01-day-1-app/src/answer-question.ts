@@ -1,4 +1,4 @@
-import { generateText } from "ai";
+import { streamText, type StreamTextResult } from "ai";
 import { model } from "./model";
 import type { SystemContext } from "./system-context";
 
@@ -6,10 +6,10 @@ interface AnswerOptions {
   isFinal?: boolean;
 }
 
-export const answerQuestion = async (
+export const answerQuestion = (
   context: SystemContext,
   options: AnswerOptions = {},
-): Promise<string> => {
+): StreamTextResult<{}, string> => {
   const { isFinal = false } = options;
   const userQuestion = context.getInitialQuestion();
 
@@ -28,11 +28,9 @@ ${context.getScrapeHistory()}
 
 Please provide a comprehensive answer to the user's question based on the information above.`;
 
-  const result = await generateText({
+  return streamText({
     model,
     system: systemPrompt,
     prompt,
   });
-
-  return result.text;
 };
