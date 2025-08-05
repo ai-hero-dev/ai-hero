@@ -51,7 +51,15 @@ export class SystemContext {
       .filter((msg) => msg.role === "user")
       .pop();
 
-    return lastUserMessage?.content ?? "";
+    if (!lastUserMessage) return "";
+
+    // Extract text content from parts
+    return (
+      lastUserMessage.parts
+        ?.filter((part) => part.type === "text")
+        .map((part) => (part as { type: "text"; text: string }).text)
+        .join("") || ""
+    );
   }
 
   getCurrentQuestion(): string {
@@ -62,6 +70,16 @@ export class SystemContext {
 
     if (!lastUserMessage) return "";
 
+    // Extract text content from parts
+    const extractTextContent = (msg: Message) => {
+      return (
+        msg.parts
+          ?.filter((part) => part.type === "text")
+          .map((part) => (part as { type: "text"; text: string }).text)
+          .join("") || ""
+      );
+    };
+
     // If this is a follow-up question (like "that's not working"),
     // we need to include the previous conversation context
     const userMessages = this.messages.filter((msg) => msg.role === "user");
@@ -70,18 +88,24 @@ export class SystemContext {
       // This is a follow-up question, include previous context
       const previousUserMessage = userMessages[userMessages.length - 2];
       if (previousUserMessage) {
-        return `Previous question: ${previousUserMessage.content}\n\nCurrent follow-up: ${lastUserMessage.content}`;
+        return `Previous question: ${extractTextContent(previousUserMessage)}\n\nCurrent follow-up: ${extractTextContent(lastUserMessage)}`;
       }
     }
 
-    return lastUserMessage.content;
+    return extractTextContent(lastUserMessage);
   }
 
   getConversationHistory(): string {
     return this.messages
       .map((msg) => {
         const role = msg.role === "user" ? "User" : "Assistant";
-        return `${role}: ${msg.content}`;
+        // Extract text content from parts
+        const textContent =
+          msg.parts
+            ?.filter((part) => part.type === "text")
+            .map((part) => (part as { type: "text"; text: string }).text)
+            .join("") || "";
+        return `${role}: ${textContent}`;
       })
       .join("\n\n");
   }

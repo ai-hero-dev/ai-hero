@@ -84,13 +84,23 @@ export const getChat = async (opts: { userId: string; chatId: string }) => {
     .map((row) => row.message!);
 
   // Convert database messages back to AI SDK Message format
-  const aiMessages: Message[] = dbMessages.map((msg) => ({
-    id: msg.id,
-    role: msg.role as "user" | "assistant" | "system",
-    parts: msg.parts as Message["parts"],
-    content: "",
-    annotations: msg.annotations as JSONValue[],
-  }));
+  const aiMessages: Message[] = dbMessages.map((msg) => {
+    // Extract text content from parts for the content field
+    const parts = msg.parts as Message["parts"];
+    const textContent =
+      parts
+        ?.filter((part) => part.type === "text")
+        .map((part) => (part as { type: "text"; text: string }).text)
+        .join("") || "";
+
+    return {
+      id: msg.id,
+      role: msg.role as "user" | "assistant" | "system",
+      parts,
+      content: textContent,
+      annotations: msg.annotations as JSONValue[],
+    };
+  });
 
   return {
     ...chat,
