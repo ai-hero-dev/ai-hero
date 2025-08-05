@@ -6,18 +6,35 @@ import type { SystemContext } from "./system-context";
 export interface SearchAction {
   type: "search";
   query: string;
+  title: string;
+  reasoning: string;
 }
 
 export interface ScrapeAction {
   type: "scrape";
   urls: string[];
+  title: string;
+  reasoning: string;
 }
 
 export interface AnswerAction {
   type: "answer";
+  title: string;
+  reasoning: string;
 }
 
 export type Action = SearchAction | ScrapeAction | AnswerAction;
+
+export type OurMessageAnnotation = {
+  type: "NEW_ACTION";
+  action: {
+    type: "search" | "scrape" | "answer";
+    title: string;
+    reasoning: string;
+    query?: string;
+    urls?: string[];
+  };
+};
 
 export const actionSchema = z.object({
   type: z.enum(["search", "scrape", "answer"]).describe(
@@ -26,6 +43,12 @@ export const actionSchema = z.object({
       - 'scrape': Scrape a URL.
       - 'answer': Answer the user's question and complete the loop.`,
   ),
+  title: z
+    .string()
+    .describe(
+      "The title of the action, to be displayed in the UI. Be extremely concise. 'Searching Saka's injury history', 'Checking HMRC industrial action', 'Comparing toaster ovens'",
+    ),
+  reasoning: z.string().describe("The reason you chose this step."),
   query: z
     .string()
     .describe("The query to search for. Required if type is 'search'.")
@@ -36,7 +59,9 @@ export const actionSchema = z.object({
     .optional(),
 });
 
-export const getNextAction = async (context: SystemContext) => {
+export const getNextAction = async (
+  context: SystemContext,
+): Promise<Action> => {
   const result = await generateObject({
     model,
     schema: actionSchema,
@@ -57,5 +82,28 @@ export const getNextAction = async (context: SystemContext) => {
     ${context.getScrapeHistory()}`,
   });
 
-  return result.object;
+  const action = result.object;
+
+  // Type the action properly based on the type field
+  if (action.type === "search") {
+    return {
+      type: "search",
+      query: action.query!,
+      title: action.title,
+      reasoning: action.reasoning,
+    };
+  } else if (action.type === "scrape") {
+    return {
+      type: "scrape",
+      urls: action.urls!,
+      title: action.title,
+      reasoning: action.reasoning,
+    };
+  } else {
+    return {
+      type: "answer",
+      title: action.title,
+      reasoning: action.reasoning,
+    };
+  }
 };

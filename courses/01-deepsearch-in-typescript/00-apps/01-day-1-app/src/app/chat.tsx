@@ -9,6 +9,7 @@ import { ChatMessage } from "~/components/chat-message";
 import { SignInModal } from "~/components/sign-in-modal";
 import { isNewChatCreated } from "~/utils";
 import type { Message } from "ai";
+import type { OurMessageAnnotation } from "~/get-next-action";
 
 interface ChatProps {
   userName: string;
@@ -90,6 +91,7 @@ export const ChatPage = ({
                   parts={message.parts ?? []}
                   role={message.role}
                   userName={userName}
+                  annotations={message.annotations as OurMessageAnnotation[]}
                 />
               );
             })}

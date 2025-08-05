@@ -6,6 +6,7 @@ import { auth } from "../../../server/auth";
 import { streamFromDeepSearch } from "../../../deep-search";
 import { upsertChat, getChat } from "../../../server/db/queries";
 import { checkRateLimit, recordRateLimit } from "../../../server/rate-limit";
+import type { OurMessageAnnotation } from "../../../get-next-action";
 
 const langfuse = new Langfuse({
   environment: env.NODE_ENV,
@@ -186,6 +187,9 @@ export async function POST(request: Request) {
           metadata: {
             langfuseTraceId: trace.id,
           },
+        },
+        writeMessageAnnotation: (annotation: OurMessageAnnotation) => {
+          dataStream.writeMessageAnnotation(annotation);
         },
       });
 
