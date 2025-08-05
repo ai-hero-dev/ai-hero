@@ -14,6 +14,7 @@ export const streamFromDeepSearch = async (opts: {
   return await runAgentLoop(opts.messages, {
     writeMessageAnnotation: opts.writeMessageAnnotation,
     langfuseTraceId: opts.langfuseTraceId,
+    onFinish: opts.onFinish,
   });
 };
 

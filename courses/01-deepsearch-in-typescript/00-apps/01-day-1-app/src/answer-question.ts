@@ -9,6 +9,7 @@ interface AnswerOptions {
 export const answerQuestion = (
   context: SystemContext,
   options: AnswerOptions = {},
+  onFinish: Parameters<typeof streamText>[0]["onFinish"],
   langfuseTraceId?: string,
 ): StreamTextResult<Record<string, never>, string> => {
   const { isFinal = false } = options;
@@ -41,6 +42,7 @@ Please provide a comprehensive answer to the user's question based on the inform
     model,
     system: systemPrompt,
     prompt,
+    onFinish,
     experimental_telemetry: langfuseTraceId
       ? {
           isEnabled: true,

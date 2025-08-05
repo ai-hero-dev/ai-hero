@@ -1,5 +1,6 @@
 import { eq, and, desc, ne } from "drizzle-orm";
 import type { Message } from "ai";
+import type { JSONValue } from "ai";
 
 import { db } from "./index";
 import { chats, messages } from "./schema";
@@ -48,6 +49,7 @@ export const upsertChat = async (opts: {
       chatId,
       role: message.role,
       parts: message.parts,
+      annotations: message.annotations,
       order: index,
     }));
 
@@ -87,6 +89,7 @@ export const getChat = async (opts: { userId: string; chatId: string }) => {
     role: msg.role as "user" | "assistant" | "system",
     parts: msg.parts as Message["parts"],
     content: "",
+    annotations: msg.annotations as JSONValue[],
   }));
 
   return {

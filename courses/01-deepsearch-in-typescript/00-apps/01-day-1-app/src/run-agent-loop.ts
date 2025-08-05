@@ -5,6 +5,7 @@ import { answerQuestion } from "./answer-question";
 import { getNextAction, type OurMessageAnnotation } from "./get-next-action";
 import type { StreamTextResult } from "ai";
 import type { Message } from "ai";
+import { streamText } from "ai";
 
 type QueryResultSearchResult = {
   date: string;
@@ -71,6 +72,7 @@ export async function runAgentLoop(
   opts: {
     writeMessageAnnotation: (annotation: OurMessageAnnotation) => void;
     langfuseTraceId?: string;
+    onFinish?: Parameters<typeof streamText>[0]["onFinish"];
   },
 ): Promise<StreamTextResult<Record<string, never>, string>> {
   const ctx = new SystemContext(messages);
@@ -99,7 +101,7 @@ export async function runAgentLoop(
       }
       await scrapeUrl(ctx, nextAction.urls);
     } else if (nextAction.type === "answer") {
-      return answerQuestion(ctx, {}, opts.langfuseTraceId);
+      return answerQuestion(ctx, {}, opts.onFinish, opts.langfuseTraceId);
     }
 
     // We increment the step counter
@@ -108,5 +110,10 @@ export async function runAgentLoop(
 
   // If we've taken 10 actions and still don't have an answer,
   // we ask the LLM to give its best attempt at an answer
-  return answerQuestion(ctx, { isFinal: true }, opts.langfuseTraceId);
+  return answerQuestion(
+    ctx,
+    { isFinal: true },
+    opts.onFinish,
+    opts.langfuseTraceId,
+  );
 }

@@ -138,6 +138,16 @@ export async function POST(request: Request) {
         });
       }
 
+      // Collect annotations in memory
+      const annotations: OurMessageAnnotation[] = [];
+
+      const writeMessageAnnotation = (annotation: OurMessageAnnotation) => {
+        // Save the annotation in-memory
+        annotations.push(annotation);
+        // Send it to the client
+        dataStream.writeMessageAnnotation(annotation);
+      };
+
       // Wait for the result
       const result = await streamFromDeepSearch({
         messages,
@@ -149,6 +159,12 @@ export async function POST(request: Request) {
             responseMessages,
           });
 
+          // Get the last message and add annotations to it
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+          if (lastMessage) {
+            (lastMessage as any).annotations = annotations;
+          }
+
           // Save the complete message history to the database
           const saveMessagesSpan = trace.span({
             name: "save-complete-message-history",
@@ -159,6 +175,7 @@ export async function POST(request: Request) {
               originalMessageCount: messages.length,
               responseMessageCount: responseMessages.length,
               totalMessageCount: updatedMessages.length,
+              annotationCount: annotations.length,
             },
           });
 
@@ -173,6 +190,7 @@ export async function POST(request: Request) {
             output: {
               chatId: finalChatId,
               totalMessageCount: updatedMessages.length,
+              annotationCount: annotations.length,
               finishReason,
               usage,
             },
@@ -182,9 +200,7 @@ export async function POST(request: Request) {
           await langfuse.flushAsync();
         },
         langfuseTraceId: trace.id,
-        writeMessageAnnotation: (annotation: OurMessageAnnotation) => {
-          dataStream.writeMessageAnnotation(annotation);
-        },
+        writeMessageAnnotation,
       });
 
       result.mergeIntoDataStream(dataStream);
