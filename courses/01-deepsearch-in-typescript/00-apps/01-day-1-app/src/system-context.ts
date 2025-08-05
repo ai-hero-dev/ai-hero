@@ -1,3 +1,5 @@
+import type { Message } from "ai";
+
 type QueryResultSearchResult = {
   date: string;
   title: string;
@@ -25,9 +27,9 @@ export class SystemContext {
   private step = 0;
 
   /**
-   * The initial question from the user
+   * The full conversation history
    */
-  private initialQuestion: string;
+  private messages: Message[];
 
   /**
    * The history of all queries searched
@@ -39,12 +41,49 @@ export class SystemContext {
    */
   private scrapeHistory: ScrapeResult[] = [];
 
-  constructor(initialQuestion: string) {
-    this.initialQuestion = initialQuestion;
+  constructor(messages: Message[]) {
+    this.messages = messages;
   }
 
   getInitialQuestion(): string {
-    return this.initialQuestion;
+    // Get the last user message as the current question
+    const lastUserMessage = this.messages
+      .filter((msg) => msg.role === "user")
+      .pop();
+
+    return lastUserMessage?.content ?? "";
+  }
+
+  getCurrentQuestion(): string {
+    // For follow-up questions, we need to provide more context
+    const lastUserMessage = this.messages
+      .filter((msg) => msg.role === "user")
+      .pop();
+
+    if (!lastUserMessage) return "";
+
+    // If this is a follow-up question (like "that's not working"),
+    // we need to include the previous conversation context
+    const userMessages = this.messages.filter((msg) => msg.role === "user");
+
+    if (userMessages.length > 1) {
+      // This is a follow-up question, include previous context
+      const previousUserMessage = userMessages[userMessages.length - 2];
+      if (previousUserMessage) {
+        return `Previous question: ${previousUserMessage.content}\n\nCurrent follow-up: ${lastUserMessage.content}`;
+      }
+    }
+
+    return lastUserMessage.content;
+  }
+
+  getConversationHistory(): string {
+    return this.messages
+      .map((msg) => {
+        const role = msg.role === "user" ? "User" : "Assistant";
+        return `${role}: ${msg.content}`;
+      })
+      .join("\n\n");
   }
 
   shouldStop() {

@@ -4,6 +4,7 @@ import { SystemContext } from "./system-context";
 import { answerQuestion } from "./answer-question";
 import { getNextAction, type OurMessageAnnotation } from "./get-next-action";
 import type { StreamTextResult } from "ai";
+import type { Message } from "ai";
 
 type QueryResultSearchResult = {
   date: string;
@@ -30,7 +31,7 @@ const search = async (
 
   const results: QueryResultSearchResult[] = searchResult.organic.map(
     (result) => ({
-      date: result.date || new Date().toISOString(),
+      date: result.date ?? new Date().toISOString(),
       title: result.title,
       url: result.link,
       snippet: result.snippet,
@@ -66,13 +67,13 @@ const scrapeUrl = async (
 };
 
 export async function runAgentLoop(
-  initialQuestion: string,
+  messages: Message[],
   opts: {
     writeMessageAnnotation: (annotation: OurMessageAnnotation) => void;
     langfuseTraceId?: string;
   },
-): Promise<StreamTextResult<{}, string>> {
-  const ctx = new SystemContext(initialQuestion);
+): Promise<StreamTextResult<Record<string, never>, string>> {
+  const ctx = new SystemContext(messages);
 
   // A loop that continues until we have an answer
   // or we've taken 10 actions

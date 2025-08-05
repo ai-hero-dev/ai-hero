@@ -1,4 +1,5 @@
-import { streamText, type Message, type StreamTextResult } from "ai";
+import { streamText } from "ai";
+import type { Message, StreamTextResult } from "ai";
 
 import { runAgentLoop } from "./run-agent-loop";
 import type { OurMessageAnnotation } from "./get-next-action";
@@ -8,18 +9,9 @@ export const streamFromDeepSearch = async (opts: {
   onFinish: Parameters<typeof streamText>[0]["onFinish"];
   langfuseTraceId?: string;
   writeMessageAnnotation: (annotation: OurMessageAnnotation) => void;
-}): Promise<StreamTextResult<{}, string>> => {
-  // Get the last user message
-  const lastUserMessage = opts.messages
-    .filter((msg) => msg.role === "user")
-    .pop();
-
-  if (!lastUserMessage?.content) {
-    throw new Error("No user message found");
-  }
-
-  // Run the agent loop with the user's question
-  return await runAgentLoop(lastUserMessage.content, {
+}): Promise<StreamTextResult<Record<string, never>, string>> => {
+  // Pass the full message history to provide context for follow-up questions
+  return await runAgentLoop(opts.messages, {
     writeMessageAnnotation: opts.writeMessageAnnotation,
     langfuseTraceId: opts.langfuseTraceId,
   });
@@ -28,9 +20,13 @@ export const streamFromDeepSearch = async (opts: {
 export async function askDeepSearch(messages: Message[]) {
   const result = await streamFromDeepSearch({
     messages,
-    onFinish: () => {}, // just a stub
+    onFinish: () => {
+      // just a stub
+    },
     langfuseTraceId: undefined,
-    writeMessageAnnotation: () => {}, // no-op for evals
+    writeMessageAnnotation: () => {
+      // no-op for evals
+    },
   });
 
   // Consume the stream - without this,

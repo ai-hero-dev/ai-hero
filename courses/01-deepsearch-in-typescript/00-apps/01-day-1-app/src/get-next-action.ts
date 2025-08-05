@@ -67,11 +67,20 @@ export const getNextAction = async (
     model,
     schema: actionSchema,
     system: `You are a helpful AI assistant that follows a specific workflow to provide accurate, detailed answers.
-      CURRENT DATE AND TIME: ${new Date().toISOString()}`,
+  
+    IMPORTANT: When handling follow-up questions (like "that's not working" or "can you explain more"), you should:
+    1. Understand the context from the previous conversation
+    2. Interpret what the user is referring to based on the conversation history
+    3. Search for information that addresses the specific issue or clarification being requested
+  
+    CURRENT DATE AND TIME: ${new Date().toISOString()}`,
     prompt: `
-    Question: ${context.getInitialQuestion()}
+    Current Question: ${context.getCurrentQuestion()}
 
-    Based on the current context, choose the next action:
+    Conversation History:
+    ${context.getConversationHistory()}
+
+    Based on the current context and conversation history, choose the next action:
       - If you need more information, choose "search" with an appropriate query
       - If you have search results but need to scrape URLs for detailed content, choose "scrape" with the URLs to scrape
       - If you have enough information to answer the user's question, choose "answer"
