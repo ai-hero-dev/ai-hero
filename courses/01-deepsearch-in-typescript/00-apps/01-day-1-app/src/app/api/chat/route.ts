@@ -141,7 +141,7 @@ export async function POST(request: Request) {
       // Wait for the result
       const result = await streamFromDeepSearch({
         messages,
-        onFinish: async ({ text, finishReason, usage, response }) => {
+        onFinish: async ({ finishReason, usage, response }) => {
           const responseMessages = response.messages;
 
           const updatedMessages = appendResponseMessages({
@@ -181,13 +181,7 @@ export async function POST(request: Request) {
           // Flush the trace to Langfuse
           await langfuse.flushAsync();
         },
-        telemetry: {
-          isEnabled: true,
-          functionId: `agent`,
-          metadata: {
-            langfuseTraceId: trace.id,
-          },
-        },
+        langfuseTraceId: trace.id,
         writeMessageAnnotation: (annotation: OurMessageAnnotation) => {
           dataStream.writeMessageAnnotation(annotation);
         },

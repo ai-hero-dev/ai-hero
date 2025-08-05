@@ -61,6 +61,7 @@ export const actionSchema = z.object({
 
 export const getNextAction = async (
   context: SystemContext,
+  langfuseTraceId?: string,
 ): Promise<Action> => {
   const result = await generateObject({
     model,
@@ -80,6 +81,15 @@ export const getNextAction = async (
     ${context.getQueryHistory()}
 
     ${context.getScrapeHistory()}`,
+    experimental_telemetry: langfuseTraceId
+      ? {
+          isEnabled: true,
+          functionId: "get-next-action",
+          metadata: {
+            langfuseTraceId,
+          },
+        }
+      : undefined,
   });
 
   const action = result.object;

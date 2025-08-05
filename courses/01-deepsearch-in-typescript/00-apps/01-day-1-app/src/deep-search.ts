@@ -1,9 +1,4 @@
-import {
-  streamText,
-  type Message,
-  type TelemetrySettings,
-  type StreamTextResult,
-} from "ai";
+import { streamText, type Message, type StreamTextResult } from "ai";
 
 import { runAgentLoop } from "./run-agent-loop";
 import type { OurMessageAnnotation } from "./get-next-action";
@@ -11,7 +6,7 @@ import type { OurMessageAnnotation } from "./get-next-action";
 export const streamFromDeepSearch = async (opts: {
   messages: Message[];
   onFinish: Parameters<typeof streamText>[0]["onFinish"];
-  telemetry: TelemetrySettings;
+  langfuseTraceId?: string;
   writeMessageAnnotation: (annotation: OurMessageAnnotation) => void;
 }): Promise<StreamTextResult<{}, string>> => {
   // Get the last user message
@@ -26,6 +21,7 @@ export const streamFromDeepSearch = async (opts: {
   // Run the agent loop with the user's question
   return await runAgentLoop(lastUserMessage.content, {
     writeMessageAnnotation: opts.writeMessageAnnotation,
+    langfuseTraceId: opts.langfuseTraceId,
   });
 };
 
@@ -33,9 +29,7 @@ export async function askDeepSearch(messages: Message[]) {
   const result = await streamFromDeepSearch({
     messages,
     onFinish: () => {}, // just a stub
-    telemetry: {
-      isEnabled: false,
-    },
+    langfuseTraceId: undefined,
     writeMessageAnnotation: () => {}, // no-op for evals
   });
 

@@ -9,6 +9,7 @@ interface AnswerOptions {
 export const answerQuestion = (
   context: SystemContext,
   options: AnswerOptions = {},
+  langfuseTraceId?: string,
 ): StreamTextResult<{}, string> => {
   const { isFinal = false } = options;
   const userQuestion = context.getInitialQuestion();
@@ -32,5 +33,14 @@ Please provide a comprehensive answer to the user's question based on the inform
     model,
     system: systemPrompt,
     prompt,
+    experimental_telemetry: langfuseTraceId
+      ? {
+          isEnabled: true,
+          functionId: "answer-question",
+          metadata: {
+            langfuseTraceId,
+          },
+        }
+      : undefined,
   });
 };
