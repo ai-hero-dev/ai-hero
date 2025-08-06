@@ -7,6 +7,7 @@ import { streamFromDeepSearch } from "../../../deep-search";
 import { upsertChat, getChat } from "../../../server/db/queries";
 import { checkRateLimit, recordRateLimit } from "../../../server/rate-limit";
 import type { OurMessageAnnotation } from "../../../get-next-action";
+import { generateChatTitle } from "../../../utils";
 
 const langfuse = new Langfuse({
   environment: env.NODE_ENV,
@@ -91,9 +92,16 @@ export async function POST(request: Request) {
     }
   }
 
-  // Create a title from the first user message
-  const firstUserMessage = messages.find((msg) => msg.role === "user");
-  const title = firstUserMessage?.content?.slice(0, 100) ?? "New Chat";
+  // Start title generation in parallel for new chats
+  let titlePromise: Promise<string> | undefined;
+
+  if (!chatId) {
+    // This is a new chat, generate a title in parallel
+    titlePromise = generateChatTitle(messages);
+  } else {
+    // This is an existing chat, no need to generate a title
+    titlePromise = Promise.resolve("");
+  }
 
   // Create the chat before starting the stream to avoid issues with long-running streams
   if (!chatId) {
@@ -102,7 +110,6 @@ export async function POST(request: Request) {
       input: {
         userId,
         chatId: finalChatId,
-        title,
         messageCount: messages.length,
       },
     });
@@ -110,14 +117,12 @@ export async function POST(request: Request) {
     await upsertChat({
       userId,
       chatId: finalChatId,
-      title,
       messages,
     });
 
     createChatSpan.end({
       output: {
         chatId: finalChatId,
-        title,
         messageCount: messages.length,
       },
     });
@@ -165,6 +170,9 @@ export async function POST(request: Request) {
             (lastMessage as any).annotations = annotations;
           }
 
+          // Resolve the title promise
+          const title = await titlePromise;
+
           // Save the complete message history to the database
           const saveMessagesSpan = trace.span({
             name: "save-complete-message-history",
@@ -182,8 +190,8 @@ export async function POST(request: Request) {
           await upsertChat({
             userId,
             chatId: finalChatId,
-            title,
             messages: updatedMessages,
+            ...(title ? { title } : {}), // Only save the title if it's not empty
           });
 
           saveMessagesSpan.end({

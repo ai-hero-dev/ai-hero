@@ -8,7 +8,7 @@ import { chats, messages } from "./schema";
 export const upsertChat = async (opts: {
   userId: string;
   chatId: string;
-  title: string;
+  title?: string;
   messages: Message[];
 }) => {
   const { userId, chatId, title, messages: chatMessages } = opts;
@@ -21,7 +21,13 @@ export const upsertChat = async (opts: {
     .limit(1);
 
   if (existingChat.length > 0) {
-    // Chat exists, delete all existing messages and replace them
+    // Chat exists, update title if provided and delete all existing messages and replace them
+    if (title !== undefined) {
+      await db
+        .update(chats)
+        .set({ title })
+        .where(and(eq(chats.id, chatId), eq(chats.userId, userId)));
+    }
     await db.delete(messages).where(eq(messages.chatId, chatId));
   } else {
     // Check if chatId is already used by a different user
@@ -38,7 +44,7 @@ export const upsertChat = async (opts: {
     // Create new chat
     await db.insert(chats).values({
       id: chatId,
-      title,
+      title: title ?? "Generating...",
       userId,
     });
   }
