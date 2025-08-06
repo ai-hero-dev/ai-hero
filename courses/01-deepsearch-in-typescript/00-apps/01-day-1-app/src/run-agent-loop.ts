@@ -7,64 +7,59 @@ import type { StreamTextResult } from "ai";
 import type { Message } from "ai";
 import { streamText } from "ai";
 
-type QueryResultSearchResult = {
+type SearchResult = {
   date: string;
   title: string;
   url: string;
   snippet: string;
+  scrapedContent: string;
 };
 
-type QueryResult = {
+type SearchHistoryEntry = {
   query: string;
-  results: QueryResultSearchResult[];
-};
-
-type ScrapeResult = {
-  url: string;
-  result: string;
+  results: SearchResult[];
 };
 
 const search = async (
   context: SystemContext,
   query: string,
-): Promise<QueryResult[]> => {
-  const searchResult = await searchSerper({ q: query, num: 10 }, undefined);
+): Promise<SearchHistoryEntry[]> => {
+  // Search for information with fewer results to reduce context window usage
+  const searchResult = await searchSerper({ q: query, num: 3 }, undefined);
 
-  const results: QueryResultSearchResult[] = searchResult.organic.map(
-    (result) => ({
-      date: result.date ?? new Date().toISOString(),
-      title: result.title,
-      url: result.link,
-      snippet: result.snippet,
-    }),
-  );
+  // Extract search results
+  const searchResults = searchResult.organic.map((result) => ({
+    date: result.date ?? new Date().toISOString(),
+    title: result.title,
+    url: result.link,
+    snippet: result.snippet,
+    scrapedContent: "", // Will be populated after scraping
+  }));
 
-  const queryResult: QueryResult = {
-    query,
-    results,
-  };
-
-  context.reportQueries([queryResult]);
-  return [queryResult];
-};
-
-const scrapeUrl = async (
-  context: SystemContext,
-  urls: string[],
-): Promise<ScrapeResult[]> => {
+  // Scrape all URLs to get detailed content
+  const urls = searchResults.map((result) => result.url);
   const crawlResult = await bulkCrawlWebsites({ urls });
 
   if (!crawlResult.success) {
     throw new Error(crawlResult.error);
   }
 
-  const scrapeResults: ScrapeResult[] = crawlResult.results.map((result) => ({
-    url: result.url,
-    result: result.result.data,
-  }));
+  // Combine search results with scraped content
+  const combinedResults: SearchResult[] = searchResults.map(
+    (result, index) => ({
+      ...result,
+      scrapedContent:
+        crawlResult.results[index]?.result.data || "Failed to scrape content",
+    }),
+  );
 
-  context.reportScrapes(scrapeResults);
-  return scrapeResults;
+  const searchHistoryEntry: SearchHistoryEntry = {
+    query,
+    results: combinedResults,
+  };
+
+  context.reportSearch(searchHistoryEntry);
+  return [searchHistoryEntry];
 };
 
 export async function runAgentLoop(
@@ -95,11 +90,6 @@ export async function runAgentLoop(
         throw new Error("Search action requires a query");
       }
       await search(ctx, nextAction.query);
-    } else if (nextAction.type === "scrape") {
-      if (!nextAction.urls || nextAction.urls.length === 0) {
-        throw new Error("Scrape action requires URLs");
-      }
-      await scrapeUrl(ctx, nextAction.urls);
     } else if (nextAction.type === "answer") {
       return answerQuestion(ctx, {}, opts.onFinish, opts.langfuseTraceId);
     }

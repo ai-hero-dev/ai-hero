@@ -10,37 +10,28 @@ export interface SearchAction {
   reasoning: string;
 }
 
-export interface ScrapeAction {
-  type: "scrape";
-  urls: string[];
-  title: string;
-  reasoning: string;
-}
-
 export interface AnswerAction {
   type: "answer";
   title: string;
   reasoning: string;
 }
 
-export type Action = SearchAction | ScrapeAction | AnswerAction;
+export type Action = SearchAction | AnswerAction;
 
 export type OurMessageAnnotation = {
   type: "NEW_ACTION";
   action: {
-    type: "search" | "scrape" | "answer";
+    type: "search" | "answer";
     title: string;
     reasoning: string;
     query?: string;
-    urls?: string[];
   };
 };
 
 export const actionSchema = z.object({
-  type: z.enum(["search", "scrape", "answer"]).describe(
+  type: z.enum(["search", "answer"]).describe(
     `The type of action to take.
-      - 'search': Search the web for more information.
-      - 'scrape': Scrape a URL.
+      - 'search': Search the web for more information and automatically scrape the results.
       - 'answer': Answer the user's question and complete the loop.`,
   ),
   title: z
@@ -52,10 +43,6 @@ export const actionSchema = z.object({
   query: z
     .string()
     .describe("The query to search for. Required if type is 'search'.")
-    .optional(),
-  urls: z
-    .array(z.string())
-    .describe("The URLs to scrape. Required if type is 'scrape'.")
     .optional(),
 });
 
@@ -81,15 +68,12 @@ export const getNextAction = async (
     ${context.getConversationHistory()}
 
     Based on the current context and conversation history, choose the next action:
-      - If you need more information, choose "search" with an appropriate query
-      - If you have search results but need to scrape URLs for detailed content, choose "scrape" with the URLs to scrape
+      - If you need more information, choose "search" with an appropriate query (this will automatically scrape the URLs for detailed content)
       - If you have enough information to answer the user's question, choose "answer"
     
     Here is the current context:
 
-    ${context.getQueryHistory()}
-
-    ${context.getScrapeHistory()}`,
+    ${context.getSearchHistory()}`,
     experimental_telemetry: langfuseTraceId
       ? {
           isEnabled: true,
@@ -108,13 +92,6 @@ export const getNextAction = async (
     return {
       type: "search",
       query: action.query!,
-      title: action.title,
-      reasoning: action.reasoning,
-    };
-  } else if (action.type === "scrape") {
-    return {
-      type: "scrape",
-      urls: action.urls!,
       title: action.title,
       reasoning: action.reasoning,
     };

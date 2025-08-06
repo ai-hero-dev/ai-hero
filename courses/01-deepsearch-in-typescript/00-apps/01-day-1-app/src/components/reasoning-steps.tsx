@@ -47,15 +47,8 @@ export const ReasoningSteps = ({
                       <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
                         <Search className="size-4" />
                         <span>{annotation.action.query}</span>
-                      </div>
-                    )}
-                    {annotation.action.type === "scrape" && (
-                      <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
-                        <Link className="size-4" />
-                        <span>
-                          {annotation.action.urls
-                            ?.map((url) => new URL(url).hostname)
-                            ?.join(", ")}
+                        <span className="text-xs text-gray-500">
+                          (includes scraping)
                         </span>
                       </div>
                     )}

@@ -32,9 +32,8 @@ Current Question: ${userQuestion}
 Conversation History:
 ${context.getConversationHistory()}
 
-${context.getQueryHistory()}
-
-${context.getScrapeHistory()}
+Search History (including scraped content):
+${context.getSearchHistory()}
 
 Please provide a comprehensive answer to the user's question based on the information above.`;
 
