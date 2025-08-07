@@ -6,13 +6,14 @@ import { getNextAction, type OurMessageAnnotation } from "./get-next-action";
 import type { StreamTextResult } from "ai";
 import type { Message } from "ai";
 import { streamText } from "ai";
+import { summarizeURL } from "./summarize-url";
 
 type SearchResult = {
   date: string;
   title: string;
   url: string;
   snippet: string;
-  scrapedContent: string;
+  summary: string;
 };
 
 type SearchHistoryEntry = {
@@ -23,9 +24,10 @@ type SearchHistoryEntry = {
 const search = async (
   context: SystemContext,
   query: string,
+  langfuseTraceId?: string,
 ): Promise<SearchHistoryEntry[]> => {
   // Search for information with fewer results to reduce context window usage
-  const searchResult = await searchSerper({ q: query, num: 3 }, undefined);
+  const searchResult = await searchSerper({ q: query, num: 5 }, undefined);
 
   // Extract search results
   const searchResults = searchResult.organic.map((result) => ({
@@ -45,17 +47,52 @@ const search = async (
   }
 
   // Combine search results with scraped content
-  const combinedResults: SearchResult[] = searchResults.map(
-    (result, index) => ({
-      ...result,
-      scrapedContent:
-        crawlResult.results[index]?.result.data || "Failed to scrape content",
-    }),
-  );
+  const combinedResults = searchResults.map((result, index) => ({
+    ...result,
+    scrapedContent:
+      crawlResult.results[index]?.result.data || "Failed to scrape content",
+  }));
+
+  // Summarize all URLs in parallel
+  const conversationHistory = context.getConversationHistory();
+  const summaryPromises = combinedResults.map(async (result) => {
+    try {
+      const summary = await summarizeURL({
+        conversationHistory,
+        scrapedContent: result.scrapedContent,
+        searchMetadata: {
+          date: result.date,
+          title: result.title,
+          url: result.url,
+          snippet: result.snippet,
+        },
+        query,
+        langfuseTraceId,
+      });
+      return {
+        date: result.date,
+        title: result.title,
+        url: result.url,
+        snippet: result.snippet,
+        summary,
+      };
+    } catch (error) {
+      console.error(`Failed to summarize ${result.url}:`, error);
+      return {
+        date: result.date,
+        title: result.title,
+        url: result.url,
+        snippet: result.snippet,
+        summary: "Failed to generate summary",
+      };
+    }
+  });
+
+  const summarizedResults = await Promise.all(summaryPromises);
 
   const searchHistoryEntry: SearchHistoryEntry = {
     query,
-    results: combinedResults,
+    results: summarizedResults,
   };
 
   context.reportSearch(searchHistoryEntry);
@@ -89,7 +126,7 @@ export async function runAgentLoop(
       if (!nextAction.query) {
         throw new Error("Search action requires a query");
       }
-      await search(ctx, nextAction.query);
+      await search(ctx, nextAction.query, opts.langfuseTraceId);
     } else if (nextAction.type === "answer") {
       return answerQuestion(ctx, {}, opts.onFinish, opts.langfuseTraceId);
     }

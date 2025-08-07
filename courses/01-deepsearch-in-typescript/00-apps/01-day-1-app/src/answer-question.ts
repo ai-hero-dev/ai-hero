@@ -24,7 +24,7 @@ IMPORTANT: When answering follow-up questions (like "that's not working" or "can
 2. Address the specific issue or clarification being requested
 3. Provide solutions or explanations that directly relate to what the user is asking about
 
-Your task is to answer the user's question based on the search results and scraped content provided. Be thorough and accurate in your response.`;
+Your task is to answer the user's question based on the search results and summarized content provided. Be thorough and accurate in your response.`;
 
   const prompt = `
 Current Question: ${userQuestion}
@@ -32,7 +32,7 @@ Current Question: ${userQuestion}
 Conversation History:
 ${context.getConversationHistory()}
 
-Search History (including scraped content):
+Search History (including summarized content):
 ${context.getSearchHistory()}
 
 Please provide a comprehensive answer to the user's question based on the information above.`;

@@ -5,7 +5,7 @@ type SearchResult = {
   title: string;
   url: string;
   snippet: string;
-  scrapedContent: string;
+  summary: string;
 };
 
 type SearchHistoryEntry = {
@@ -18,9 +18,9 @@ const toSearchResult = (result: SearchResult) =>
     `### ${result.date} - ${result.title}`,
     result.url,
     result.snippet,
-    `<scrape_result>`,
-    result.scrapedContent,
-    `</scrape_result>`,
+    `<summary>`,
+    result.summary,
+    `</summary>`,
   ].join("\n\n");
 
 export class SystemContext {
