@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Link } from "lucide-react";
+import { Search, Brain, CheckCircle } from "lucide-react";
 import type { OurMessageAnnotation } from "../get-next-action";
 
 export const ReasoningSteps = ({
@@ -10,6 +10,27 @@ export const ReasoningSteps = ({
   const [openStep, setOpenStep] = useState<number | null>(null);
 
   if (annotations.length === 0) return null;
+
+  const getIcon = (actionType: string) => {
+    switch (actionType) {
+      case "continue":
+        return <Search className="size-4" />;
+      case "answer":
+        return <CheckCircle className="size-4" />;
+      default:
+        return <Brain className="size-4" />;
+    }
+  };
+
+  const getActionDescription = (action: OurMessageAnnotation["action"]) => {
+    if (action.type === "continue") {
+      if (action.title.includes("Planning")) {
+        return "Planning search strategy and generating queries";
+      }
+      return "Continuing research with additional searches";
+    }
+    return "Providing final answer";
+  };
 
   return (
     <div className="mb-4 w-full">
@@ -35,7 +56,10 @@ export const ReasoningSteps = ({
                 >
                   {index + 1}
                 </span>
-                {annotation.action.title}
+                <div className="flex items-center gap-2">
+                  {getIcon(annotation.action.type)}
+                  <span>{annotation.action.title}</span>
+                </div>
               </button>
               <div className={`${isOpen ? "mt-1" : "hidden"}`}>
                 {isOpen && (
@@ -43,15 +67,15 @@ export const ReasoningSteps = ({
                     <div className="text-sm italic text-gray-400">
                       {annotation.action.reasoning}
                     </div>
-                    {annotation.action.type === "search" && (
-                      <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
-                        <Search className="size-4" />
-                        <span>{annotation.action.query}</span>
+                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
+                      {getIcon(annotation.action.type)}
+                      <span>{getActionDescription(annotation.action)}</span>
+                      {annotation.action.type === "continue" && (
                         <span className="text-xs text-gray-500">
                           (includes scraping)
                         </span>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

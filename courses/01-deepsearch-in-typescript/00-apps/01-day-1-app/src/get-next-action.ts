@@ -3,9 +3,8 @@ import { z } from "zod";
 import { model } from "./model";
 import type { SystemContext } from "./system-context";
 
-export interface SearchAction {
-  type: "search";
-  query: string;
+export interface ContinueAction {
+  type: "continue";
   title: string;
   reasoning: string;
 }
@@ -16,34 +15,29 @@ export interface AnswerAction {
   reasoning: string;
 }
 
-export type Action = SearchAction | AnswerAction;
+export type Action = ContinueAction | AnswerAction;
 
 export type OurMessageAnnotation = {
   type: "NEW_ACTION";
   action: {
-    type: "search" | "answer";
+    type: "continue" | "answer";
     title: string;
     reasoning: string;
-    query?: string;
   };
 };
 
-export const actionSchema = z.object({
-  type: z.enum(["search", "answer"]).describe(
+const actionSchema = z.object({
+  type: z.enum(["continue", "answer"]).describe(
     `The type of action to take.
-      - 'search': Search the web for more information and automatically scrape the results.
+      - 'continue': Continue searching for more information to better answer the question.
       - 'answer': Answer the user's question and complete the loop.`,
   ),
   title: z
     .string()
     .describe(
-      "The title of the action, to be displayed in the UI. Be extremely concise. 'Searching Saka's injury history', 'Checking HMRC industrial action', 'Comparing toaster ovens'",
+      "The title of the action, to be displayed in the UI. Be extremely concise. Examples: 'Continuing research', 'Gathering more information', 'Providing answer'",
     ),
   reasoning: z.string().describe("The reason you chose this step."),
-  query: z
-    .string()
-    .describe("The query to search for. Required if type is 'search'.")
-    .optional(),
 });
 
 export const getNextAction = async (
@@ -58,7 +52,7 @@ export const getNextAction = async (
     IMPORTANT: When handling follow-up questions (like "that's not working" or "can you explain more"), you should:
     1. Understand the context from the previous conversation
     2. Interpret what the user is referring to based on the conversation history
-    3. Search for information that addresses the specific issue or clarification being requested
+    3. Continue searching for information that addresses the specific issue or clarification being requested
   
     CURRENT DATE AND TIME: ${new Date().toISOString()}`,
     prompt: `
@@ -68,7 +62,7 @@ export const getNextAction = async (
     ${context.getConversationHistory()}
 
     Based on the current context and conversation history, choose the next action:
-      - If you need more information, choose "search" with an appropriate query (this will automatically scrape the URLs for detailed content)
+      - If you need more information to provide a comprehensive answer, choose "continue"
       - If you have enough information to answer the user's question, choose "answer"
     
     Here is the current context:
@@ -85,21 +79,5 @@ export const getNextAction = async (
       : undefined,
   });
 
-  const action = result.object;
-
-  // Type the action properly based on the type field
-  if (action.type === "search") {
-    return {
-      type: "search",
-      query: action.query!,
-      title: action.title,
-      reasoning: action.reasoning,
-    };
-  } else {
-    return {
-      type: "answer",
-      title: action.title,
-      reasoning: action.reasoning,
-    };
-  }
+  return result.object;
 };
