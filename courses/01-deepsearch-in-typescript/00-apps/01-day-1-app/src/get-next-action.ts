@@ -18,15 +18,28 @@ export interface AnswerAction {
 
 export type Action = ContinueAction | AnswerAction;
 
-export type OurMessageAnnotation = {
-  type: "NEW_ACTION";
-  action: {
-    type: "continue" | "answer";
-    title: string;
-    reasoning: string;
-    feedback?: string;
-  };
+export type SourceItem = {
+  title: string;
+  url: string;
+  snippet: string;
+  favicon?: string;
 };
+
+export type OurMessageAnnotation =
+  | {
+      type: "NEW_ACTION";
+      action: {
+        type: "continue" | "answer";
+        title: string;
+        reasoning: string;
+        feedback?: string;
+      };
+    }
+  | {
+      type: "SOURCES";
+      query: string;
+      sources: SourceItem[];
+    };
 
 const actionSchema = z.object({
   type: z.enum(["continue", "answer"]).describe(

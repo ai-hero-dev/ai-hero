@@ -2,7 +2,11 @@ import { bulkCrawlWebsites } from "./scraper";
 import { searchSerper } from "./serper";
 import { SystemContext } from "./system-context";
 import { answerQuestion } from "./answer-question";
-import { getNextAction, type OurMessageAnnotation } from "./get-next-action";
+import {
+  getNextAction,
+  type OurMessageAnnotation,
+  type SourceItem,
+} from "./get-next-action";
 import { queryRewriter } from "./query-rewriter";
 import type { StreamTextResult } from "ai";
 import type { Message } from "ai";
@@ -22,36 +26,53 @@ type SearchHistoryEntry = {
   results: SearchResult[];
 };
 
-const search = async (
-  context: SystemContext,
+// Helper function to extract favicon URL from a website URL
+const getFaviconUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url);
+    return `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
+  } catch {
+    return "";
+  }
+};
+
+// New type for search results before scraping
+type RawSearchResult = {
+  date: string;
+  title: string;
+  url: string;
+  snippet: string;
+  query: string;
+};
+
+const fetchSearchResults = async (
   query: string,
   langfuseTraceId?: string,
-): Promise<SearchHistoryEntry[]> => {
+): Promise<RawSearchResult[]> => {
   // Search for information with fewer results to reduce context window usage
   const searchResult = await searchSerper({ q: query, num: 5 }, undefined);
 
   // Extract search results and filter out Reddit URLs to avoid robots.txt issues
-  const searchResults = searchResult.organic
+  return searchResult.organic
     .filter((result) => !result.link.includes("reddit.com"))
     .map((result) => ({
       date: result.date ?? new Date().toISOString(),
       title: result.title,
       url: result.link,
       snippet: result.snippet,
-      scrapedContent: "", // Will be populated after scraping
+      query,
     }));
+};
 
+const processSearchResults = async (
+  context: SystemContext,
+  searchResults: RawSearchResult[],
+  langfuseTraceId?: string,
+): Promise<SearchHistoryEntry[]> => {
   // If no valid URLs remain after filtering, return empty results
   if (searchResults.length === 0) {
-    console.warn(
-      `No valid URLs found for query: ${query} (all results were Reddit URLs)`,
-    );
-    const searchHistoryEntry: SearchHistoryEntry = {
-      query,
-      results: [],
-    };
-    context.reportSearch(searchHistoryEntry);
-    return [searchHistoryEntry];
+    console.warn("No valid URLs found in search results");
+    return [];
   }
 
   // Scrape all URLs to get detailed content
@@ -60,10 +81,7 @@ const search = async (
 
   // Handle failed crawls gracefully
   if (!crawlResult.success) {
-    console.warn(
-      `Failed to crawl some websites for query: ${query}`,
-      crawlResult.error,
-    );
+    console.warn("Failed to crawl some websites", crawlResult.error);
 
     // Create results with empty scraped content for failed crawls
     const combinedResults = searchResults.map((result, index) => ({
@@ -73,50 +91,11 @@ const search = async (
         : "Failed to scrape content",
     }));
 
-    // Continue with summarization even if some crawls failed
-    const conversationHistory = context.getConversationHistory();
-    const summaryPromises = combinedResults.map(async (result) => {
-      try {
-        const summary = await summarizeURL({
-          conversationHistory,
-          scrapedContent: result.scrapedContent,
-          searchMetadata: {
-            date: result.date,
-            title: result.title,
-            url: result.url,
-            snippet: result.snippet,
-          },
-          query,
-          langfuseTraceId,
-        });
-        return {
-          date: result.date,
-          title: result.title,
-          url: result.url,
-          snippet: result.snippet,
-          summary,
-        };
-      } catch (error) {
-        console.error(`Failed to summarize ${result.url}:`, error);
-        return {
-          date: result.date,
-          title: result.title,
-          url: result.url,
-          snippet: result.snippet,
-          summary: "Failed to generate summary",
-        };
-      }
-    });
-
-    const summarizedResults = await Promise.all(summaryPromises);
-
-    const searchHistoryEntry: SearchHistoryEntry = {
-      query,
-      results: summarizedResults,
-    };
-
-    context.reportSearch(searchHistoryEntry);
-    return [searchHistoryEntry];
+    return await summarizeAndGroupResults(
+      combinedResults,
+      context,
+      langfuseTraceId,
+    );
   }
 
   // Combine search results with scraped content
@@ -126,6 +105,18 @@ const search = async (
       crawlResult.results[index]?.result.data || "Failed to scrape content",
   }));
 
+  return await summarizeAndGroupResults(
+    combinedResults,
+    context,
+    langfuseTraceId,
+  );
+};
+
+const summarizeAndGroupResults = async (
+  combinedResults: (RawSearchResult & { scrapedContent: string })[],
+  context: SystemContext,
+  langfuseTraceId?: string,
+): Promise<SearchHistoryEntry[]> => {
   // Summarize all URLs in parallel
   const conversationHistory = context.getConversationHistory();
   const summaryPromises = combinedResults.map(async (result) => {
@@ -139,7 +130,7 @@ const search = async (
           url: result.url,
           snippet: result.snippet,
         },
-        query,
+        query: result.query,
         langfuseTraceId,
       });
       return {
@@ -148,6 +139,7 @@ const search = async (
         url: result.url,
         snippet: result.snippet,
         summary,
+        query: result.query,
       };
     } catch (error) {
       console.error(`Failed to summarize ${result.url}:`, error);
@@ -157,19 +149,42 @@ const search = async (
         url: result.url,
         snippet: result.snippet,
         summary: "Failed to generate summary",
+        query: result.query,
       };
     }
   });
 
   const summarizedResults = await Promise.all(summaryPromises);
 
-  const searchHistoryEntry: SearchHistoryEntry = {
-    query,
-    results: summarizedResults,
-  };
+  // Group results by query
+  const resultsByQuery = summarizedResults.reduce<
+    Record<string, SearchResult[]>
+  >((acc, result) => {
+    if (!acc[result.query]) {
+      acc[result.query] = [];
+    }
+    acc[result.query]!.push({
+      date: result.date,
+      title: result.title,
+      url: result.url,
+      snippet: result.snippet,
+      summary: result.summary,
+    });
+    return acc;
+  }, {});
 
-  context.reportSearch(searchHistoryEntry);
-  return [searchHistoryEntry];
+  // Create search history entries and report to context
+  const searchHistoryEntries: SearchHistoryEntry[] = [];
+  for (const [query, results] of Object.entries(resultsByQuery)) {
+    const searchHistoryEntry: SearchHistoryEntry = {
+      query,
+      results,
+    };
+    context.reportSearch(searchHistoryEntry);
+    searchHistoryEntries.push(searchHistoryEntry);
+  }
+
+  return searchHistoryEntries;
 };
 
 export async function runAgentLoop(
@@ -199,16 +214,46 @@ export async function runAgentLoop(
       },
     });
 
-    // 2. Search based on the queries
+    // 2. Fetch search results from all queries in parallel
     const searchPromises = queryPlan.queries.map((query) =>
-      search(ctx, query, opts.langfuseTraceId),
+      fetchSearchResults(query, opts.langfuseTraceId),
     );
 
-    await Promise.all(searchPromises);
+    const allRawResults = await Promise.all(searchPromises);
+    const flatResults = allRawResults.flat();
 
-    // 3. Save to context (this is done automatically in the search function via context.reportSearch)
+    // 3. Deduplicate results by URL
+    const uniqueResults = flatResults.reduce<RawSearchResult[]>(
+      (acc, current) => {
+        const exists = acc.find((item) => item.url === current.url);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      },
+      [],
+    );
 
-    // 4. Decide whether to continue by calling getNextAction
+    // 4. Send sources annotation to frontend
+    if (uniqueResults.length > 0) {
+      const sources: SourceItem[] = uniqueResults.map((result) => ({
+        title: result.title,
+        url: result.url,
+        snippet: result.snippet,
+        favicon: getFaviconUrl(result.url),
+      }));
+
+      opts.writeMessageAnnotation({
+        type: "SOURCES",
+        query: queryPlan.queries.join(", "),
+        sources,
+      });
+    }
+
+    // 5. Process the search results (scrape, summarize, and report to context)
+    await processSearchResults(ctx, uniqueResults, opts.langfuseTraceId);
+
+    // 6. Decide whether to continue by calling getNextAction
     const nextAction = await getNextAction(ctx, opts.langfuseTraceId);
 
     // Store the evaluator feedback in context for the next iteration (only for continue actions)

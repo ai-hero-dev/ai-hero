@@ -30,6 +30,7 @@ export default async function HomePage({
         role: msg.role as "user" | "assistant",
         parts: msg.parts as Message["parts"],
         content: "",
+        annotations: msg.annotations, // Include annotations from database
       }));
     }
   }
