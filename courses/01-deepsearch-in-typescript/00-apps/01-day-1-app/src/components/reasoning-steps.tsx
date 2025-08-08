@@ -67,6 +67,14 @@ export const ReasoningSteps = ({
                     <div className="text-sm italic text-gray-400">
                       {annotation.action.reasoning}
                     </div>
+                    {annotation.action.feedback && (
+                      <div className="mt-2 rounded bg-gray-800 p-2 text-sm text-gray-300">
+                        <div className="mb-1 text-xs font-semibold text-gray-400">
+                          Evaluator Feedback:
+                        </div>
+                        {annotation.action.feedback}
+                      </div>
+                    )}
                     <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
                       {getIcon(annotation.action.type)}
                       <span>{getActionDescription(annotation.action)}</span>

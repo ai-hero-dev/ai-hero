@@ -57,7 +57,10 @@ Current Question: ${context.getCurrentQuestion()}
 Conversation History:
 ${context.getConversationHistory()}
 
-Based on the current context and conversation history, create a detailed research plan and generate the appropriate search queries to gather the necessary information.
+Previous Evaluator Feedback:
+${context.getEvaluatorFeedback() || "No previous feedback available - this is the first search iteration."}
+
+Based on the current context, conversation history, and evaluator feedback, create a detailed research plan and generate the appropriate search queries to gather the necessary information.
 
 Here is the current context:
 

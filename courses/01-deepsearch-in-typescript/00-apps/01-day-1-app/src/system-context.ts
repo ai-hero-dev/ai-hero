@@ -39,6 +39,11 @@ export class SystemContext {
    */
   private searchHistory: SearchHistoryEntry[] = [];
 
+  /**
+   * The most recent feedback from the evaluator
+   */
+  private evaluatorFeedback: string = "";
+
   constructor(messages: Message[]) {
     this.messages = messages;
   }
@@ -129,6 +134,14 @@ export class SystemContext {
         ].join("\n\n"),
       )
       .join("\n\n");
+  }
+
+  setEvaluatorFeedback(feedback: string) {
+    this.evaluatorFeedback = feedback;
+  }
+
+  getEvaluatorFeedback(): string {
+    return this.evaluatorFeedback;
   }
 
   // Legacy methods for backward compatibility during transition

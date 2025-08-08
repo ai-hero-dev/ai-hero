@@ -195,6 +195,7 @@ export async function runAgentLoop(
         type: "continue",
         title: "Planning search strategy",
         reasoning: `Generated ${queryPlan.queries.length} search queries based on research plan: ${queryPlan.plan}`,
+        feedback: `Research plan: ${queryPlan.plan}`,
       },
     });
 
@@ -209,6 +210,11 @@ export async function runAgentLoop(
 
     // 4. Decide whether to continue by calling getNextAction
     const nextAction = await getNextAction(ctx, opts.langfuseTraceId);
+
+    // Store the evaluator feedback in context for the next iteration (only for continue actions)
+    if (nextAction.type === "continue" && nextAction.feedback) {
+      ctx.setEvaluatorFeedback(nextAction.feedback);
+    }
 
     // Send action decision annotation to frontend
     opts.writeMessageAnnotation({
