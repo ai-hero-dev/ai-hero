@@ -113,6 +113,21 @@ export class SystemContext {
       .join("\n\n");
   }
 
+  getMessageHistory(): string {
+    return this.messages
+      .map((msg) => {
+        const role = msg.role === "user" ? "User" : "Assistant";
+        // Extract text content from parts
+        const textContent =
+          msg.parts
+            ?.filter((part) => part.type === "text")
+            .map((part) => (part as { type: "text"; text: string }).text)
+            .join("") || "";
+        return `<${role}>${textContent}</${role}>`;
+      })
+      .join("\n");
+  }
+
   shouldStop() {
     return this.step >= 10;
   }
