@@ -85,5 +85,14 @@
   },
   "prettier": {
     "printWidth": 55
+  },
+  "pnpm": {
+    "packageExtensions": {
+      "better-sqlite3": {
+        "optionalDependencies": {
+          "node-gyp": "*"
+        }
+      }
+    }
   }
 }
