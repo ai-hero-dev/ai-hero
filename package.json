@@ -36,7 +36,7 @@
     "robots-parser": "^3.0.1",
     "turndown": "^7.2.0",
     "unstorage": "^1.13.1",
-    "vitest": "^2.0.0",
+    "vitest": "^3.2.6",
     "zod": "^3.24.1"
   },
   "scripts": {
