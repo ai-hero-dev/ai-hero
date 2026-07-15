@@ -13,7 +13,7 @@
     "@ai-sdk/react": "^1.1.15",
     "@clack/prompts": "0.10.0",
     "@hono/node-server": "^1.13.7",
-    "@modelcontextprotocol/sdk": "^1.6.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.11",
