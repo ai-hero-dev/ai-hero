@@ -12,7 +12,7 @@
     "@ai-sdk/openai-compatible": "^0.0.13",
     "@ai-sdk/react": "^1.1.15",
     "@clack/prompts": "0.10.0",
-    "@hono/node-server": "^1.13.7",
+    "@hono/node-server": "^2.0.10",
     "@modelcontextprotocol/sdk": "^1.6.1",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
