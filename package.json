@@ -27,7 +27,7 @@
     "dotenv": "^16.4.7",
     "evalite": "0.8.0",
     "express": "^4.21.2",
-    "hono": "^4.6.17",
+    "hono": "^4.12.27",
     "lucide-react": "^0.474.0",
     "openid-client": "^6.1.7",
     "pg": "^8.13.3",
