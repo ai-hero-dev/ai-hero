@@ -39,7 +39,7 @@
     "langfuse-vercel": "^3.37.2",
     "lucide-react": "^0.474.0",
     "next": "^15.2.4",
-    "next-auth": "5.0.0-beta.25",
+    "next-auth": "5.0.0-beta.32",
     "postgres": "^3.4.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
