@@ -27,7 +27,7 @@
     "ioredis": "^5.5.0",
     "jstoxml": "^5.0.2",
     "lucide-react": "^0.474.0",
-    "next": "^15.2.4",
+    "next": "^15.5.21",
     "next-auth": "5.0.0-beta.25",
     "postgres": "^3.4.4",
     "react": "^18.3.1",
