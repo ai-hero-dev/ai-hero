@@ -25,7 +25,7 @@ dependencies:
     version: 0.10.0
   '@hono/node-server':
     specifier: ^1.13.7
-    version: 1.13.7(hono@4.6.17)
+    version: 1.13.7(hono@4.12.34)
   '@modelcontextprotocol/sdk':
     specifier: ^1.6.1
     version: 1.6.1
@@ -69,8 +69,8 @@ dependencies:
     specifier: ^4.21.2
     version: 4.21.2
   hono:
-    specifier: ^4.6.17
-    version: 4.6.17
+    specifier: ^4.12.34
+    version: 4.12.34
   lucide-react:
     specifier: ^0.474.0
     version: 0.474.0(react@19.0.0)
@@ -427,8 +427,8 @@ packages:
       sisteransi: 1.0.5
     dev: false
 
-  /@emnapi/runtime@1.3.1:
-    resolution: {integrity: sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw==}
+  /@emnapi/runtime@1.11.3:
+    resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
     requiresBuild: true
     dependencies:
       tslib: 2.8.1
@@ -1235,13 +1235,13 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@hono/node-server@1.13.7(hono@4.6.17):
+  /@hono/node-server@1.13.7(hono@4.12.34):
     resolution: {integrity: sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
     dependencies:
-      hono: 4.6.17
+      hono: 4.12.34
     dev: false
 
   /@humanfs/core@0.19.1:
@@ -1430,7 +1430,7 @@ packages:
     cpu: [wasm32]
     requiresBuild: true
     dependencies:
-      '@emnapi/runtime': 1.3.1
+      '@emnapi/runtime': 1.11.3
     dev: true
     optional: true
 
@@ -4262,8 +4262,8 @@ packages:
       function-bind: 1.1.2
     dev: false
 
-  /hono@4.6.17:
-    resolution: {integrity: sha512-Kbh4M0so2RzLiIg6iP33DoTU68TdvP2O/kb1Hhhdwa37fazuf402ig8ZRfjkz2dqXwiWl2dAgh0f++TuKAdOtQ==}
+  /hono@4.12.34:
+    resolution: {integrity: sha512-GqXJqY/xJkJmuloTrnV1ZEXG3fqte+VjkUqoRNZXcrUidiUOP4fMSIHHY4tsqZBK++kVyWmt/AAfSUuy57/eSA==}
     engines: {node: '>=16.9.0'}
     dev: false
 
@@ -5626,8 +5626,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: false
 
-  /pg-cloudflare@1.1.1:
-    resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
+  /pg-cloudflare@1.4.0:
+    resolution: {integrity: sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A==}
     requiresBuild: true
     dev: false
     optional: true
@@ -5697,7 +5697,7 @@ packages:
       pg-types: 2.2.0
       pgpass: 1.0.5
     optionalDependencies:
-      pg-cloudflare: 1.1.1
+      pg-cloudflare: 1.4.0
     dev: false
 
   /pgpass@1.0.5:
